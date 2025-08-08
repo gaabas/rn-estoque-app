@@ -182,3 +182,4 @@ function updateSendButtonVisibility() {
         sendBtnEl.classList.add('hidden');
     }
 }
+
