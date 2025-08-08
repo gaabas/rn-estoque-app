@@ -1,7 +1,7 @@
 // =================================================================
 // !!! CONFIGURAÇÃO OBRIGATÓRIA !!!
 // =================================================================
-const API_URL = "https://script.google.com/macros/s/AKfycbyOkzu4_Qc73DcLj4_xsF4pQrkU6hkcwYuz56gPJit8tyoGzkH_uU1dccFKlKGYKBNc/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyIMJjpuzSRo8qAbyPKwxOsBkIBFGXF_61LQBe-D2P0aji7t7kx_Do7IA5-9TM-5aa-lw/exec";
 const API_KEY = "teste123";
 // =================================================================
 
@@ -182,6 +182,7 @@ function updateSendButtonVisibility() {
         sendBtnEl.classList.add('hidden');
     }
 }
+
 
 
 
