@@ -2,7 +2,7 @@
 // !!! CONFIGURAÇÃO OBRIGATÓRIA !!!
 // =================================================================
 const API_URL = "https://script.google.com/macros/s/AKfycbxYSEo8uNFG_G8gG7Ah1wIvLK-azjrwKvsUM9aZ7Ubn4KRUZiQf1y72Hwm3sMZ_CdBO/exec";
-const API_KEY = "COLE_A_SUA_API_KEY_AQUI";
+const API_KEY = "aSdAPIeh3461!laksokekekeodod";
 // =================================================================
 
 let allItems = [];
@@ -182,4 +182,5 @@ function updateSendButtonVisibility() {
         sendBtnEl.classList.add('hidden');
     }
 }
+
 
