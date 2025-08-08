@@ -1,7 +1,7 @@
 // =================================================================
 // !!! CONFIGURAÇÃO OBRIGATÓRIA !!!
 // =================================================================
-const API_URL = "COLE_A_URL_DA_SUA_ULTIMA_IMPLANTACAO_AQUI"; // A url que você acabou de re-implantar
+const API_URL = "COLE_A_URL_DA_SUA_ULTIMA_IMPLANTACAO_AQUI";
 const API_KEY = "teste123";
 // =================================================================
 
@@ -14,44 +14,41 @@ const userSelectorEl = document.getElementById('user');
 
 document.addEventListener('DOMContentLoaded', initializeApp);
 
-function initializeApp() {
-    loadLocalChanges();
-    fetchData();
-    sendBtnEl.addEventListener('click', sendBatch);
-}
+function initializeApp() { loadLocalChanges(); fetchData(); sendBtnEl.addEventListener('click', sendBatch); }
 
-// !!! MUDANÇA IMPORTANTE AQUI !!!
+// !!! MUDANÇA FINAL AQUI !!!
 async function fetchData() {
     itemListEl.innerHTML = '<p class="loading-message">Carregando itens...</p>';
     try {
-        // Opções para a requisição, incluindo o header da API Key
-        const fetchOptions = {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': API_KEY
-            }
-        };
-
-        // A chave foi REMOVIDA da URL e colocada nos HEADERS
+        // A URL agora é limpa, sem parâmetros. Toda a informação vai nos headers.
         const [itemsRes, pendenciasRes] = await Promise.all([
-            fetch(`${API_URL}?path=itens`, fetchOptions),
-            fetch(`${API_URL}?path=pendencias`, fetchOptions)
+            fetch(API_URL, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': API_KEY,
+                    'x-api-path': 'itens' // Header customizado para o path
+                }
+            }),
+            fetch(API_URL, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': API_KEY,
+                    'x-api-path': 'pendencias' // Header customizado para o path
+                }
+            })
         ]);
 
-        if (!itemsRes.ok) throw new Error(`Falha ao buscar itens: ${itemsRes.statusText}`);
-        if (!pendenciasRes.ok) throw new Error(`Falha ao buscar pendências: ${pendenciasRes.statusText}`);
+        if (!itemsRes.ok) { const err = await itemsRes.json(); throw new Error(`Falha ao buscar itens: ${err.error}`); }
+        if (!pendenciasRes.ok) { const err = await pendenciasRes.json(); throw new Error(`Falha ao buscar pendências: ${err.error}`); }
         
         const items = await itemsRes.json();
         const pendencias = await pendenciasRes.json();
 
         allItems = items.map(item => {
             const pendencia = pendencias.find(p => p.itemId === item.id);
-            return {
-                ...item,
-                status: pendencia ? pendencia.status : 'OK',
-                nota: pendencia ? pendencia.nota : ''
-            };
+            return { ...item, status: pendencia ? pendencia.status : 'OK', nota: pendencia ? pendencia.nota : '' };
         });
         
         renderItems();
@@ -94,12 +91,7 @@ function updateCardUI(itemId, newStatus) {
     const buttonContainer = card.querySelector('.status-buttons');
     card.className = 'item-card';
     card.classList.add(`status-${newStatus.toLowerCase()}`);
-    buttonContainer.querySelectorAll('button').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.dataset.status === newStatus) {
-            btn.classList.add('active');
-        }
-    });
+    buttonContainer.querySelectorAll('button').forEach(btn => { btn.classList.remove('active'); if (btn.dataset.status === newStatus) { btn.classList.add('active'); } });
 }
 
 async function sendBatch() {
@@ -114,10 +106,7 @@ async function sendBatch() {
             headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
             body: JSON.stringify(payload)
         });
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ error: "Erro desconhecido no servidor" }));
-            throw new Error(errorData.error || `Erro HTTP: ${response.status}`);
-        }
+        if (!response.ok) { const errorData = await response.json().catch(() => ({ error: "Erro desconhecido no servidor" })); throw new Error(errorData.error || `Erro HTTP: ${response.status}`); }
         const result = await response.json();
         console.log('Resposta do servidor:', result);
         alert('Alterações enviadas com sucesso!');
