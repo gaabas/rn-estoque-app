@@ -10,17 +10,30 @@ const itemListEl = document.getElementById('item-list'); const sendBtnEl = docum
 document.addEventListener('DOMContentLoaded', initializeApp);
 function initializeApp() { loadLocalChanges(); fetchData(); sendBtnEl.addEventListener('click', sendBatch); }
 
-// TUDO AGORA É POST
+// O TRUQUE SUJO PARA CONTORNAR O BUG DO GOOGLE
+async function apiCall(payload) {
+    // A chave agora vai dentro do corpo da requisição
+    const body = JSON.stringify({ ...payload, apiKey: API_KEY });
+
+    const response = await fetch(API_URL, {
+        method: 'POST',
+        // O header é text/plain para evitar a pergunta de permissão (preflight)
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: body,
+        mode: 'cors' // Mantemos o modo cors
+    });
+
+    if (!response.ok) {
+        const err = await response.json().catch(() => ({ error: `Erro HTTP ${response.status}` }));
+        throw new Error(err.error || `Erro desconhecido`);
+    }
+    return response.json();
+}
+
 async function fetchData() {
     itemListEl.innerHTML = '<p class="loading-message">Carregando itens...</p>';
     try {
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
-            body: JSON.stringify({ action: 'fetchData' })
-        });
-        if (!response.ok) { const err = await response.json(); throw new Error(`Falha na API: ${err.error}`); }
-        const data = await response.json();
+        const data = await apiCall({ action: 'fetchData' });
         const { items, pendencias } = data;
         allItems = items.map(item => { const pendencia = pendencias.find(p => p.itemId === item.id); return { ...item, status: pendencia ? pendencia.status : 'OK', nota: pendencia ? pendencia.nota : '' }; });
         renderItems(); updateSendButtonVisibility();
@@ -34,14 +47,8 @@ async function sendBatch() {
     if (Object.keys(localChanges).length === 0) return;
     sendBtnEl.textContent = '...'; sendBtnEl.disabled = true;
     const entries = Object.keys(localChanges).map(itemId => ({ itemId: itemId, status: localChanges[itemId].status }));
-    const payload = { action: 'submitBatch', user: userSelectorEl.value, entries: entries, batchId: crypto.randomUUID(), sentAt: new Date().toISOString() };
     try {
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY },
-            body: JSON.stringify(payload)
-        });
-        if (!response.ok) { const errorData = await response.json().catch(() => ({ error: "Erro desconhecido" })); throw new Error(errorData.error || `Erro HTTP: ${response.status}`); }
+        await apiCall({ action: 'submitBatch', user: userSelectorEl.value, entries: entries, batchId: crypto.randomUUID(), sentAt: new Date().toISOString() });
         alert('Alterações enviadas com sucesso!');
         localChanges = {}; clearLocalChanges(); updateSendButtonVisibility(); await fetchData();
     } catch (error) {
@@ -52,6 +59,7 @@ async function sendBatch() {
     }
 }
 
+// --- Funções de renderização sem mudanças ---
 function renderItems() { itemListEl.innerHTML = ''; allItems.forEach(item => { const localStatus = localChanges[item.id]?.status; const currentStatus = localStatus || item.status; const card = document.createElement('div'); card.className = 'item-card'; card.id = `card-${item.id}`; card.classList.add(`status-${currentStatus.toLowerCase()}`); card.innerHTML = `<div class="item-info"><h2>${item.nome}</h2><p>${item.categoria} (Par Mínimo: ${item.parMin} ${item.unidade})</p></div><div class="status-buttons" data-item-id="${item.id}"><button class="btn-ok ${currentStatus === 'OK' ? 'active' : ''}" data-status="OK">✓</button><button class="btn-pp ${currentStatus === 'PP' ? 'active' : ''}" data-status="PP">⚠</button><button class="btn-falta ${currentStatus === 'FALTA' ? 'active' : ''}" data-status="FALTA">❌</button></div>`; itemListEl.appendChild(card); }); itemListEl.addEventListener('click', handleStatusClick); }
 function handleStatusClick(e) { const button = e.target.closest('button[data-status]'); if (!button) return; const { itemId, status: newStatus } = button.dataset; localChanges[itemId] = { status: newStatus }; saveLocalChanges(); updateCardUI(itemId, newStatus); updateSendButtonVisibility(); }
 function updateCardUI(itemId, newStatus) { const card = document.getElementById(`card-${itemId}`); if (!card) return; const buttonContainer = card.querySelector('.status-buttons'); card.className = 'item-card'; card.classList.add(`status-${newStatus.toLowerCase()}`); buttonContainer.querySelectorAll('button').forEach(btn => { btn.classList.remove('active'); if (btn.dataset.status === newStatus) { btn.classList.add('active'); } }); }
