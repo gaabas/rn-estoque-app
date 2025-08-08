@@ -1,0 +1,8 @@
+{
+  "short_name": "RN Estoque",
+  "name": "Rango in Natura - Checagem de Estoque",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#4CAF50",
+  "background_color": "#ffffff"
+}
