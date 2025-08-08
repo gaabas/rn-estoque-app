@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RIN - Checagem de Estoque</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50"/>
+</head>
+<body>
+    <header>
+        <h1>Checagem de Estoque</h1>
+        <div class="user-selector">
+            <label for="user">Operador(a):</label>
+            <select id="user">
+                <option value="Producao_1">Maria</option>
+                <option value="Producao_2">João</option>
+                <option value="Producao_3">Ana</option>
+            </select>
+        </div>
+    </header>
+
+    <main>
+        <div id="item-list">
+            <p class="loading-message">Carregando itens...</p>
+        </div>
+    </main>
+    
+    <button id="send-batch-btn" class="fab hidden" title="Enviar Alterações">
+        <span>&#10148;</span>
+    </button>
+
+    <script src="app.js"></script>
+</body>
+</html>
