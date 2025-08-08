@@ -1,7 +1,7 @@
 // =================================================================
 // !!! CONFIGURAÇÃO OBRIGATÓRIA !!!
 // =================================================================
-const API_URL = "COLE_A_URL_DA_SUA_ULTIMA_IMPLANTACAO_AQUI";
+const API_URL = "https://script.google.com/macros/s/AKfycbyIMJjpuzSRo8qAbyPKwxOsBkIBFGXF_61LQBe-D2P0aji7t7kx_Do7IA5-9TM-5aa-lw/exec";
 const API_KEY = "teste123";
 // =================================================================
 
@@ -127,3 +127,4 @@ function saveLocalChanges() { localStorage.setItem('rinEstoqueRascunho', JSON.st
 function loadLocalChanges() { const saved = localStorage.getItem('rinEstoqueRascunho'); if (saved) { localChanges = JSON.parse(saved); } }
 function clearLocalChanges() { localStorage.removeItem('rinEstoqueRascunho'); }
 function updateSendButtonVisibility() { if (Object.keys(localChanges).length > 0) { sendBtnEl.classList.remove('hidden'); } else { sendBtnEl.classList.add('hidden'); } }
+
