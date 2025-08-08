@@ -1,7 +1,7 @@
 // =================================================================
 // !!! CONFIGURAÇÃO OBRIGATÓRIA !!!
 // =================================================================
-const API_URL = "https://script.google.com/macros/s/AKfycbxYSEo8uNFG_G8gG7Ah1wIvLK-azjrwKvsUM9aZ7Ubn4KRUZiQf1y72Hwm3sMZ_CdBO/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxSNocS9te3T03z7H1MgySs1FGL-PqGMbitd_-27sYGXrBkcRUNW15vZ7V_PdPFANZ7/exec";
 const API_KEY = "aSdAPIeh3461!laksokekekeodod";
 // =================================================================
 
@@ -182,6 +182,7 @@ function updateSendButtonVisibility() {
         sendBtnEl.classList.add('hidden');
     }
 }
+
 
 
 
