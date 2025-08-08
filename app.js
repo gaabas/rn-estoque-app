@@ -1,8 +1,8 @@
 // =================================================================
 // !!! CONFIGURAÇÃO OBRIGATÓRIA !!!
 // =================================================================
-const API_URL = "https://script.google.com/macros/s/AKfycbxSNocS9te3T03z7H1MgySs1FGL-PqGMbitd_-27sYGXrBkcRUNW15vZ7V_PdPFANZ7/exec";
-const API_KEY = "aSdAPIeh3461!laksokekekeodod";
+const API_URL = "https://script.google.com/macros/s/AKfycbyOkzu4_Qc73DcLj4_xsF4pQrkU6hkcwYuz56gPJit8tyoGzkH_uU1dccFKlKGYKBNc/exec";
+const API_KEY = "teste123";
 // =================================================================
 
 let allItems = [];
@@ -182,6 +182,7 @@ function updateSendButtonVisibility() {
         sendBtnEl.classList.add('hidden');
     }
 }
+
 
 
 
