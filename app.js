@@ -1,25 +1,27 @@
-// app.js
-// Import dinâmico do supabase-js (ESM via esm.sh)
+// app.js — RIN v2 (Supabase) — substitua o arquivo inteiro por este
+
+// Import do cliente Supabase (ESM)
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// ==== CONFIG ====================================================================================
-const SUPABASE_URL = (window.__ENV && window.__ENV.VITE_SUPABASE_URL) || 'https://slrjqqzzxxpywquphvjz.supabase.co';
-const SUPABASE_ANON_KEY = (window.__ENV && window.__ENV.VITE_SUPABASE_ANON_KEY) || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNscmpxcXp6eHhweXdxdXBodmp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2OTYyMjksImV4cCI6MjA3MDI3MjIyOX0.JuzZMOC2X4NQUXeVdYBoQDY5pN-2O2igPK0zjNdcjcU';
+// ====== CONFIG ================================================================================
+const SUPABASE_URL =
+  (window.__ENV && window.__ENV.VITE_SUPABASE_URL) ||
+  'https://slrjqqzzxxpywquphvjz.supabase.co';            // <-- troque aqui
 
-if (SUPABASE_URL.startsWith('COLOQUE') || SUPABASE_ANON_KEY.startsWith('COLOQUE')) {
-  console.warn('Defina SUPABASE_URL e SUPABASE_ANON_KEY antes de publicar.');
-}
+const SUPABASE_ANON_KEY =
+  (window.__ENV && window.__ENV.VITE_SUPABASE_ANON_KEY) ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNscmpxcXp6eHhweXdxdXBodmp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2OTYyMjksImV4cCI6MjA3MDI3MjIyOX0.JuzZMOC2X4NQUXeVdYBoQDY5pN-2O2igPK0zjNdcjcU';       // <-- troque aqui
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ==== ESTADO ====================================================================================
+// ====== ESTADO ================================================================================
 let currentView = 'producao'; // 'producao' | 'compras'
 let allItems = [];
 let filtered = [];
 let staged = new Map(); // id -> { status }
 let selected = new Set(); // ids selecionados
 
-// ==== ELEMENTOS =================================================================================
+// ====== ELEMENTOS =============================================================================
 const $tabs = document.querySelectorAll('.tab');
 const $search = document.getElementById('search');
 const $filter = document.getElementById('filter');
@@ -37,7 +39,7 @@ const $markWarn = document.getElementById('markWarn');
 const $markBad = document.getElementById('markBad');
 const $save = document.getElementById('save');
 
-// ==== HELPERS ===================================================================================
+// ====== HELPERS ===============================================================================
 const statusToEmoji = (s) => {
   switch (s) {
     case 'OK': return { label: 'OK', cls: 'ok' };
@@ -51,6 +53,28 @@ function normalize(str) {
   return (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
+function notify(msg) {
+  const n = document.createElement('div');
+  n.textContent = msg;
+  n.style.position = 'fixed';
+  n.style.right = '16px';
+  n.style.bottom = '72px';
+  n.style.background = '#1a2230';
+  n.style.border = '1px solid #2b3545';
+  n.style.borderRadius = '10px';
+  n.style.padding = '8px 12px';
+  n.style.boxShadow = '0 6px 20px rgba(0,0,0,.35)';
+  n.style.zIndex = '9999';
+  document.body.appendChild(n);
+  setTimeout(() => n.remove(), 1600);
+}
+
+function updateSaveButton() {
+  const n = staged.size;
+  $save.textContent = n ? `Salvar alterações (${n})` : 'Salvar alterações';
+  $save.disabled = n === 0;
+}
+
 function applyFilters() {
   const q = normalize($search.value);
   const f = $filter.value; // TODOS | OK | ALERTA | FALTA
@@ -58,7 +82,7 @@ function applyFilters() {
   let rows = allItems.slice();
 
   if (currentView === 'compras') {
-    // Em "Compras", mostramos só o que está ruim: ALERTA ou FALTA
+    // Em "Compras", só o que NÃO está OK
     rows = rows.filter(r => (staged.get(r.id)?.status || r.status) !== 'OK');
   }
 
@@ -158,13 +182,20 @@ function render() {
   }
 }
 
+// ====== MUTAÇÕES LOCAIS ========================================================================
 function stageStatus(id, status) {
   const current = staged.get(id) || {};
   staged.set(id, { ...current, status });
+  updateSaveButton();
   render();
 }
 
-// ==== SUPABASE – CRUD ===========================================================================
+function bulkStage(status) {
+  for (const id of selected) stageStatus(id, status);
+  updateSaveButton();
+}
+
+// ====== SUPABASE – CRUD ========================================================================
 async function fetchItems() {
   const { data, error } = await supabase
     .from('itens')
@@ -179,34 +210,6 @@ async function fetchItems() {
   render();
 }
 
-async function saveStaged() {
-  if (staged.size === 0) return;
-
-  const updates = [];
-  for (const [id, patch] of staged.entries()) {
-    updates.push({ id, ...patch });
-  }
-
-  const { data, error } = await supabase
-    .from('itens')
-    .upsert(updates, { onConflict: 'id' }) // atualiza pela PK
-    .select();
-
-  if (error) {
-    console.error('Erro ao salvar alterações:', error);
-    return;
-  }
-
-  // Sincroniza estado local
-  for (const row of data) {
-    const idx = allItems.findIndex(i => i.id === row.id);
-    if (idx >= 0) allItems[idx] = { ...allItems[idx], ...row };
-  }
-  staged.clear();
-  selected.clear();
-  render();
-}
-
 async function addItem(payload) {
   const { data, error } = await supabase
     .from('itens')
@@ -216,6 +219,7 @@ async function addItem(payload) {
 
   if (error) {
     console.error('Erro ao adicionar item:', error);
+    alert('Não consegui adicionar o item.');
     return null;
   }
   allItems.push(data);
@@ -224,13 +228,47 @@ async function addItem(payload) {
   return data;
 }
 
-function bulkStage(status) {
-  for (const id of selected) {
-    stageStatus(id, status);
+// >>> NOVO Salvar: updates explícitos por ID + feedback
+async function saveStaged() {
+  if (staged.size === 0) return;
+
+  $save.disabled = true;
+  const originalLabel = $save.textContent;
+  $save.textContent = 'Salvando…';
+
+  try {
+    const ops = [];
+    for (const [id, patch] of staged.entries()) {
+      ops.push(
+        supabase.from('itens').update(patch).eq('id', id).select().single()
+      );
+    }
+
+    const results = await Promise.all(ops);
+    const failed = results.find(r => r && r.error);
+
+    if (failed) {
+      console.error('Falha ao salvar:', failed.error);
+      alert('Não consegui salvar algumas alterações. Veja o console (F12).');
+      return;
+    }
+
+    await fetchItems();   // recarrega do banco para garantir
+    staged.clear();
+    selected.clear();
+    notify('Alterações salvas');
+  } catch (e) {
+    console.error('Erro inesperado no save:', e);
+    alert('Erro inesperado ao salvar. Veja o console.');
+  } finally {
+    $save.disabled = false;
+    $save.textContent = originalLabel;
+    updateSaveButton();
   }
 }
 
-// ==== EVENTOS ===================================================================================
+// ====== EVENTOS ================================================================================
+// Tabs
 $tabs.forEach(tab => {
   tab.addEventListener('click', () => {
     $tabs.forEach(t => t.classList.remove('active'));
@@ -240,6 +278,7 @@ $tabs.forEach(tab => {
   });
 });
 
+// Filtros e ações
 $search.addEventListener('input', render);
 $filter.addEventListener('change', render);
 $refresh.addEventListener('click', fetchItems);
@@ -249,6 +288,7 @@ $markWarn.addEventListener('click', () => bulkStage('ALERTA'));
 $markBad.addEventListener('click', () => bulkStage('FALTA'));
 $save.addEventListener('click', saveStaged);
 
+// Form
 $addForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const payload = {
@@ -264,7 +304,11 @@ $addForm.addEventListener('submit', async (e) => {
   $nome.focus();
 });
 
-// ==== BOOT ======================================================================================
+// ====== BOOT ===================================================================================
+updateSaveButton();
 fetchItems();
 
-
+// (Opcional) Realtime para refletir alterações feitas de outro lugar
+// supabase.channel('itens-ch')
+//   .on('postgres_changes', { event: '*', schema: 'public', table: 'itens' }, fetchItems)
+//   .subscribe();
