@@ -3,8 +3,9 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 // ==== CONFIG ====================================================================================
-const SUPABASE_URL = (window.__ENV && window.__ENV.VITE_SUPABASE_URL) || 'COLOQUE_SUA_SUPABASE_URL_AQUI';
-const SUPABASE_ANON_KEY = (window.__ENV && window.__ENV.VITE_SUPABASE_ANON_KEY) || 'COLOQUE_SUA_ANON_KEY_AQUI';
+const SUPABASE_URL = (window.__ENV && window.__ENV.VITE_SUPABASE_URL) || 'https://slrjqqzzxxpywquphvjz.supabase.co';
+const SUPABASE_ANON_KEY = (window.__ENV && window.__ENV.VITE_SUPABASE_ANON_KEY) || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNscmpxcXp6eHhweXdxdXBodmp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2OTYyMjksImV4cCI6MjA3MDI3MjIyOX0.JuzZMOC2X4NQUXeVdYBoQDY5pN-2O2igPK0zjNdcjcU
+';
 
 if (SUPABASE_URL.startsWith('COLOQUE') || SUPABASE_ANON_KEY.startsWith('COLOQUE')) {
   console.warn('Defina SUPABASE_URL e SUPABASE_ANON_KEY antes de publicar.');
@@ -266,3 +267,4 @@ $addForm.addEventListener('submit', async (e) => {
 
 // ==== BOOT ======================================================================================
 fetchItems();
+
