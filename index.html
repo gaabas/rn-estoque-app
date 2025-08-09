@@ -6,7 +6,6 @@
   <title>RIN – Checagem de Estoque</title>
   <link rel="stylesheet" href="./style.css" />
   <style>
-    /* Estilos básicos para funcionar mesmo sem seu CSS */
     :root { --gap: 12px; --bg:#0b0d10; --card:#151a21; --muted:#8a93a5; --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; }
     body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial; background:#0d1117; color:#e5e7eb; }
     header { display:flex; align-items:center; justify-content:space-between; padding:16px; border-bottom:1px solid #232b37; background:#0b0d10; position:sticky; top:0; z-index:10; }
@@ -15,6 +14,8 @@
     .tab.active { background:#1a2230; border-color:#2b3545; }
     .toolbar { display:flex; gap:8px; align-items:center; }
     .toolbar input, .toolbar select { background:#0f141a; color:#e5e7eb; border:1px solid #243043; border-radius:8px; padding:8px 10px; }
+    .admin { display:flex; gap:8px; align-items:center; }
+    .badge { font-size:12px; padding:4px 8px; border-radius:999px; border:1px solid #2b3545; background:#1a2230; display:none; }
     .container { padding:16px; }
     .grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
     .card { background:#11161d; border:1px solid #1f2835; border-radius:14px; padding:12px; display:flex; flex-direction:column; gap:8px; }
@@ -50,12 +51,17 @@
         <option value="FALTA">❌ falta</option>
       </select>
       <button id="refresh" class="ghost">Recarregar</button>
+      <div class="admin">
+        <span id="adminBadge" class="badge">Gestor</span>
+        <button id="adminBtn" class="ghost">Entrar como Gestor</button>
+      </div>
     </div>
   </header>
 
   <div class="container">
-    <form class="add-item" id="addForm">
-      <input id="nome" placeholder="Nome do item" required />
+    <!-- VISÍVEL apenas no modo Gestor -->
+    <form class="add-item" id="addForm" style="display:none">
+      <input id="nome" placeholder="Nome do item" />
       <input id="categoria" placeholder="Categoria" />
       <input id="unidade" placeholder="Unidade (kg, un, pct…)" />
       <input id="parMin" type="number" min="0" placeholder="Par mín." />
@@ -73,7 +79,6 @@
     <button id="save" class="primary">Salvar alterações</button>
   </div>
 
-  <!-- app.js como módulo (importa supabase-js via ESM lá dentro) -->
   <script type="module" src="./app.js"></script>
 </body>
 </html>
