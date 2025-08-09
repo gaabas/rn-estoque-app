@@ -1,25 +1,29 @@
-// app.js — RIN v2 (Supabase) — substitua o arquivo inteiro por este
+// app.js — RIN v2 (Supabase) + Modo Gestor
 
-// Import do cliente Supabase (ESM)
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 // ====== CONFIG ================================================================================
+// Troque URL e ANON KEY pelas suas (ou injete via window.__ENV, se preferir).
 const SUPABASE_URL =
   (window.__ENV && window.__ENV.VITE_SUPABASE_URL) ||
-  'https://slrjqqzzxxpywquphvjz.supabase.co';            // <-- troque aqui
+  'https://SEU-PROJECT-ID.supabase.co';
 
 const SUPABASE_ANON_KEY =
   (window.__ENV && window.__ENV.VITE_SUPABASE_ANON_KEY) ||
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNscmpxcXp6eHhweXdxdXBodmp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2OTYyMjksImV4cCI6MjA3MDI3MjIyOX0.JuzZMOC2X4NQUXeVdYBoQDY5pN-2O2igPK0zjNdcjcU';       // <-- troque aqui
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+
+// PIN simples de gestor (MVP). Guarde isso fora do código depois.
+const GESTOR_PIN = '1234'; // <<< troque
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ====== ESTADO ================================================================================
-let currentView = 'producao'; // 'producao' | 'compras'
+let currentView = 'producao';
 let allItems = [];
 let filtered = [];
 let staged = new Map(); // id -> { status }
 let selected = new Set(); // ids selecionados
+let isGestor = !!localStorage.getItem('rin_is_gestor');
 
 // ====== ELEMENTOS =============================================================================
 const $tabs = document.querySelectorAll('.tab');
@@ -38,6 +42,9 @@ const $markOk = document.getElementById('markOk');
 const $markWarn = document.getElementById('markWarn');
 const $markBad = document.getElementById('markBad');
 const $save = document.getElementById('save');
+
+const $adminBtn = document.getElementById('adminBtn');
+const $adminBadge = document.getElementById('adminBadge');
 
 // ====== HELPERS ===============================================================================
 const statusToEmoji = (s) => {
@@ -73,6 +80,18 @@ function updateSaveButton() {
   const n = staged.size;
   $save.textContent = n ? `Salvar alterações (${n})` : 'Salvar alterações';
   $save.disabled = n === 0;
+}
+
+function updateGestorUI() {
+  if (isGestor) {
+    $addForm.style.display = 'grid';
+    $adminBadge.style.display = 'inline-block';
+    $adminBtn.textContent = 'Sair do modo Gestor';
+  } else {
+    $addForm.style.display = 'none';
+    $adminBadge.style.display = 'none';
+    $adminBtn.textContent = 'Entrar como Gestor';
+  }
 }
 
 function applyFilters() {
@@ -228,7 +247,7 @@ async function addItem(payload) {
   return data;
 }
 
-// >>> NOVO Salvar: updates explícitos por ID + feedback
+// Atualiza status por ID (mais previsível que upsert)
 async function saveStaged() {
   if (staged.size === 0) return;
 
@@ -253,7 +272,7 @@ async function saveStaged() {
       return;
     }
 
-    await fetchItems();   // recarrega do banco para garantir
+    await fetchItems();   // garante estado sincronizado
     staged.clear();
     selected.clear();
     notify('Alterações salvas');
@@ -288,13 +307,14 @@ $markWarn.addEventListener('click', () => bulkStage('ALERTA'));
 $markBad.addEventListener('click', () => bulkStage('FALTA'));
 $save.addEventListener('click', saveStaged);
 
-// Form
+// Form (apenas se Gestor estiver ativo e o form visível)
 $addForm.addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (!isGestor) { alert('Somente Gestor pode adicionar itens.'); return; }
   const payload = {
-    nome: $nome.value.trim(),
-    categoria: $categoria.value.trim() || null,
-    unidade: $unidade.value.trim() || null,
+    nome: ($nome.value || '').trim(),
+    categoria: ($categoria.value || '').trim() || null,
+    unidade: ($unidade.value || '').trim() || null,
     parMin: $parMin.value ? Number($parMin.value) : null,
     status: 'OK'
   };
@@ -304,11 +324,27 @@ $addForm.addEventListener('submit', async (e) => {
   $nome.focus();
 });
 
+// Modo Gestor
+$adminBtn.addEventListener('click', () => {
+  if (isGestor) {
+    isGestor = false;
+    localStorage.removeItem('rin_is_gestor');
+    updateGestorUI();
+    notify('Saiu do modo Gestor');
+    return;
+  }
+  const pin = prompt('PIN do Gestor:');
+  if (pin === GESTOR_PIN) {
+    isGestor = true;
+    localStorage.setItem('rin_is_gestor', '1');
+    updateGestorUI();
+    notify('Modo Gestor ativado');
+  } else if (pin !== null) {
+    alert('PIN incorreto.');
+  }
+});
+
 // ====== BOOT ===================================================================================
+updateGestorUI();
 updateSaveButton();
 fetchItems();
-
-// (Opcional) Realtime para refletir alterações feitas de outro lugar
-// supabase.channel('itens-ch')
-//   .on('postgres_changes', { event: '*', schema: 'public', table: 'itens' }, fetchItems)
-//   .subscribe();
