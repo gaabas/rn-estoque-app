@@ -1,36 +1,79 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!doctype html>
+<html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RIN - Checagem de Estoque</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#4CAF50"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RIN – Checagem de Estoque</title>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    /* Estilos básicos para funcionar mesmo sem seu CSS */
+    :root { --gap: 12px; --bg:#0b0d10; --card:#151a21; --muted:#8a93a5; --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; }
+    body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial; background:#0d1117; color:#e5e7eb; }
+    header { display:flex; align-items:center; justify-content:space-between; padding:16px; border-bottom:1px solid #232b37; background:#0b0d10; position:sticky; top:0; z-index:10; }
+    .tabs { display:flex; gap:8px; }
+    .tab { padding:8px 12px; border-radius:10px; background:#11161d; border:1px solid #1f2835; cursor:pointer; }
+    .tab.active { background:#1a2230; border-color:#2b3545; }
+    .toolbar { display:flex; gap:8px; align-items:center; }
+    .toolbar input, .toolbar select { background:#0f141a; color:#e5e7eb; border:1px solid #243043; border-radius:8px; padding:8px 10px; }
+    .container { padding:16px; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+    .card { background:#11161d; border:1px solid #1f2835; border-radius:14px; padding:12px; display:flex; flex-direction:column; gap:8px; }
+    .name { font-weight:600; }
+    .meta { color:var(--muted); font-size:12px; display:flex; gap:10px; }
+    .status { display:flex; gap:6px; }
+    .pill { padding:4px 8px; border-radius:999px; font-size:12px; border:1px solid transparent; }
+    .pill.ok    { background:rgba(34,197,94,.12);  border-color:#1e894c; }
+    .pill.warn  { background:rgba(245,158,11,.12); border-color:#9b6a0a; }
+    .pill.bad   { background:rgba(239,68,68,.12);  border-color:#993232; }
+    .btnbar { display:flex; gap:8px; }
+    button { cursor:pointer; border-radius:10px; border:1px solid #2b3545; background:#0f141a; color:#e5e7eb; padding:8px 10px; }
+    button.primary { background:#1a2230; border-color:#2b3545; }
+    button.ghost { background:#0f141a; }
+    .footerbar { position:sticky; bottom:0; background:#0b0d10; border-top:1px solid #232b37; padding:10px 16px; display:flex; gap:8px; justify-content:flex-end; }
+    form.add-item { display:grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap:8px; margin-bottom:16px; }
+    form.add-item input { background:#0f141a; color:#e5e7eb; border:1px solid #243043; border-radius:8px; padding:8px 10px; }
+    .empty { color:#9aa3b6; font-style:italic; padding:24px 0; }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>Checagem de Estoque</h1>
-        <div class="user-selector">
-            <label for="user">Operador(a):</label>
-            <select id="user">
-                <option value="Producao_1">Maria</option>
-                <option value="Producao_2">João</option>
-                <option value="Producao_3">Ana</option>
-            </select>
-        </div>
-    </header>
+  <header>
+    <div class="tabs">
+      <button class="tab active" data-view="producao">Produção</button>
+      <button class="tab" data-view="compras">Compras</button>
+    </div>
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="Buscar item…" />
+      <select id="filter">
+        <option value="TODOS">Todos</option>
+        <option value="OK">OK</option>
+        <option value="ALERTA">⚠ alerta</option>
+        <option value="FALTA">❌ falta</option>
+      </select>
+      <button id="refresh" class="ghost">Recarregar</button>
+    </div>
+  </header>
 
-    <main>
-        <div id="item-list">
-            <p class="loading-message">Carregando itens...</p>
-        </div>
-    </main>
-    
-    <button id="send-batch-btn" class="fab hidden" title="Enviar Alterações">
-        <span>&#10148;</span>
-    </button>
+  <div class="container">
+    <form class="add-item" id="addForm">
+      <input id="nome" placeholder="Nome do item" required />
+      <input id="categoria" placeholder="Categoria" />
+      <input id="unidade" placeholder="Unidade (kg, un, pct…)" />
+      <input id="parMin" type="number" min="0" placeholder="Par mín." />
+      <button type="submit" class="primary">Adicionar</button>
+    </form>
 
-    <script src="app.js"></script>
+    <div id="list" class="grid"></div>
+    <div id="empty" class="empty" style="display:none;">Nenhum item encontrado.</div>
+  </div>
+
+  <div class="footerbar">
+    <button id="markOk">Marcar selecionados como OK</button>
+    <button id="markWarn">Marcar selecionados como ⚠ Alerta</button>
+    <button id="markBad">Marcar selecionados como ❌ Falta</button>
+    <button id="save" class="primary">Salvar alterações</button>
+  </div>
+
+  <!-- app.js como módulo (importa supabase-js via ESM lá dentro) -->
+  <script type="module" src="./app.js"></script>
 </body>
 </html>
