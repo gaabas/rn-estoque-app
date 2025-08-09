@@ -1,69 +1,268 @@
-// =================================================================
-// !!! CONFIGURAÇÃO OBRIGATÓRIA !!!
-// =================================================================
-const API_URL = "https://script.google.com/macros/s/AKfycbyIMJjpuzSRo8qAbyPKwxOsBkIBFGXF_61LQBe-D2P0aji7t7kx_Do7IA5-9TM-5aa-lw/exec";
-const API_KEY = "teste123";
-// =================================================================
+// app.js
+// Import dinâmico do supabase-js (ESM via esm.sh)
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-let allItems = []; let localChanges = {};
-const itemListEl = document.getElementById('item-list'); const sendBtnEl = document.getElementById('send-batch-btn'); const userSelectorEl = document.getElementById('user');
-document.addEventListener('DOMContentLoaded', initializeApp);
-function initializeApp() { loadLocalChanges(); fetchData(); sendBtnEl.addEventListener('click', sendBatch); }
+// ==== CONFIG ====================================================================================
+const SUPABASE_URL = (window.__ENV && window.__ENV.VITE_SUPABASE_URL) || 'COLOQUE_SUA_SUPABASE_URL_AQUI';
+const SUPABASE_ANON_KEY = (window.__ENV && window.__ENV.VITE_SUPABASE_ANON_KEY) || 'COLOQUE_SUA_ANON_KEY_AQUI';
 
-// O TRUQUE SUJO PARA CONTORNAR O BUG DO GOOGLE
-async function apiCall(payload) {
-    // A chave agora vai dentro do corpo da requisição
-    const body = JSON.stringify({ ...payload, apiKey: API_KEY });
+if (SUPABASE_URL.startsWith('COLOQUE') || SUPABASE_ANON_KEY.startsWith('COLOQUE')) {
+  console.warn('Defina SUPABASE_URL e SUPABASE_ANON_KEY antes de publicar.');
+}
 
-    const response = await fetch(API_URL, {
-        method: 'POST',
-        // O header é text/plain para evitar a pergunta de permissão (preflight)
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: body,
-        mode: 'cors' // Mantemos o modo cors
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ==== ESTADO ====================================================================================
+let currentView = 'producao'; // 'producao' | 'compras'
+let allItems = [];
+let filtered = [];
+let staged = new Map(); // id -> { status }
+let selected = new Set(); // ids selecionados
+
+// ==== ELEMENTOS =================================================================================
+const $tabs = document.querySelectorAll('.tab');
+const $search = document.getElementById('search');
+const $filter = document.getElementById('filter');
+const $refresh = document.getElementById('refresh');
+const $list = document.getElementById('list');
+const $empty = document.getElementById('empty');
+const $addForm = document.getElementById('addForm');
+const $nome = document.getElementById('nome');
+const $categoria = document.getElementById('categoria');
+const $unidade = document.getElementById('unidade');
+const $parMin = document.getElementById('parMin');
+
+const $markOk = document.getElementById('markOk');
+const $markWarn = document.getElementById('markWarn');
+const $markBad = document.getElementById('markBad');
+const $save = document.getElementById('save');
+
+// ==== HELPERS ===================================================================================
+const statusToEmoji = (s) => {
+  switch (s) {
+    case 'OK': return { label: 'OK', cls: 'ok' };
+    case 'ALERTA': return { label: '⚠ alerta', cls: 'warn' };
+    case 'FALTA': return { label: '❌ falta', cls: 'bad' };
+    default: return { label: s, cls: '' };
+  }
+};
+
+function normalize(str) {
+  return (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function applyFilters() {
+  const q = normalize($search.value);
+  const f = $filter.value; // TODOS | OK | ALERTA | FALTA
+
+  let rows = allItems.slice();
+
+  if (currentView === 'compras') {
+    // Em "Compras", mostramos só o que está ruim: ALERTA ou FALTA
+    rows = rows.filter(r => (staged.get(r.id)?.status || r.status) !== 'OK');
+  }
+
+  if (f !== 'TODOS') {
+    rows = rows.filter(r => (staged.get(r.id)?.status || r.status) === f);
+  }
+
+  if (q) {
+    rows = rows.filter(r =>
+      normalize(r.nome).includes(q) ||
+      normalize(r.categoria).includes(q) ||
+      normalize(r.unidade).includes(q)
+    );
+  }
+
+  filtered = rows;
+}
+
+function render() {
+  applyFilters();
+  $list.innerHTML = '';
+  if (filtered.length === 0) {
+    $empty.style.display = 'block';
+    return;
+  }
+  $empty.style.display = 'none';
+
+  for (const item of filtered) {
+    const effectiveStatus = staged.get(item.id)?.status || item.status;
+    const s = statusToEmoji(effectiveStatus);
+
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const header = document.createElement('div');
+    header.style.display = 'flex';
+    header.style.justifyContent = 'space-between';
+    header.style.alignItems = 'center';
+
+    const name = document.createElement('div');
+    name.className = 'name';
+    name.textContent = item.nome;
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = selected.has(item.id);
+    checkbox.addEventListener('change', (e) => {
+      if (e.target.checked) selected.add(item.id);
+      else selected.delete(item.id);
     });
 
-    if (!response.ok) {
-        const err = await response.json().catch(() => ({ error: `Erro HTTP ${response.status}` }));
-        throw new Error(err.error || `Erro desconhecido`);
-    }
-    return response.json();
+    header.appendChild(name);
+    header.appendChild(checkbox);
+
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.innerHTML = `
+      <span>${item.categoria || '–'}</span>
+      <span>•</span>
+      <span>${item.unidade || '–'}</span>
+      <span>•</span>
+      <span>par mín.: ${item.parMin ?? '–'}</span>
+    `;
+
+    const statusRow = document.createElement('div');
+    statusRow.className = 'status';
+    const pill = document.createElement('span');
+    pill.className = `pill ${s.cls}`;
+    pill.textContent = s.label;
+    statusRow.appendChild(pill);
+
+    const btns = document.createElement('div');
+    btns.className = 'btnbar';
+
+    const bOk = document.createElement('button');
+    bOk.textContent = 'OK';
+    bOk.addEventListener('click', () => { stageStatus(item.id, 'OK'); });
+
+    const bWarn = document.createElement('button');
+    bWarn.textContent = '⚠ Alerta';
+    bWarn.addEventListener('click', () => { stageStatus(item.id, 'ALERTA'); });
+
+    const bBad = document.createElement('button');
+    bBad.textContent = '❌ Falta';
+    bBad.addEventListener('click', () => { stageStatus(item.id, 'FALTA'); });
+
+    btns.appendChild(bOk);
+    btns.appendChild(bWarn);
+    btns.appendChild(bBad);
+
+    card.appendChild(header);
+    card.appendChild(meta);
+    card.appendChild(statusRow);
+    card.appendChild(btns);
+
+    $list.appendChild(card);
+  }
 }
 
-async function fetchData() {
-    itemListEl.innerHTML = '<p class="loading-message">Carregando itens...</p>';
-    try {
-        const data = await apiCall({ action: 'fetchData' });
-        const { items, pendencias } = data;
-        allItems = items.map(item => { const pendencia = pendencias.find(p => p.itemId === item.id); return { ...item, status: pendencia ? pendencia.status : 'OK', nota: pendencia ? pendencia.nota : '' }; });
-        renderItems(); updateSendButtonVisibility();
-    } catch (error) {
-        console.error("Erro ao buscar dados:", error);
-        itemListEl.innerHTML = `<p class="loading-message" style="color:red;">Erro ao carregar: ${error.message}.</p>`;
-    }
+function stageStatus(id, status) {
+  const current = staged.get(id) || {};
+  staged.set(id, { ...current, status });
+  render();
 }
 
-async function sendBatch() {
-    if (Object.keys(localChanges).length === 0) return;
-    sendBtnEl.textContent = '...'; sendBtnEl.disabled = true;
-    const entries = Object.keys(localChanges).map(itemId => ({ itemId: itemId, status: localChanges[itemId].status }));
-    try {
-        await apiCall({ action: 'submitBatch', user: userSelectorEl.value, entries: entries, batchId: crypto.randomUUID(), sentAt: new Date().toISOString() });
-        alert('Alterações enviadas com sucesso!');
-        localChanges = {}; clearLocalChanges(); updateSendButtonVisibility(); await fetchData();
-    } catch (error) {
-        console.error("Erro ao enviar lote:", error);
-        alert(`Falha ao enviar: ${error.message}.`);
-    } finally {
-        sendBtnEl.innerHTML = '<span>&#10148;</span>'; sendBtnEl.disabled = false;
-    }
+// ==== SUPABASE – CRUD ===========================================================================
+async function fetchItems() {
+  const { data, error } = await supabase
+    .from('itens')
+    .select('*')
+    .order('nome', { ascending: true });
+
+  if (error) {
+    console.error('Erro ao carregar itens:', error);
+    return;
+  }
+  allItems = data || [];
+  render();
 }
 
-// --- Funções de renderização sem mudanças ---
-function renderItems() { itemListEl.innerHTML = ''; allItems.forEach(item => { const localStatus = localChanges[item.id]?.status; const currentStatus = localStatus || item.status; const card = document.createElement('div'); card.className = 'item-card'; card.id = `card-${item.id}`; card.classList.add(`status-${currentStatus.toLowerCase()}`); card.innerHTML = `<div class="item-info"><h2>${item.nome}</h2><p>${item.categoria} (Par Mínimo: ${item.parMin} ${item.unidade})</p></div><div class="status-buttons" data-item-id="${item.id}"><button class="btn-ok ${currentStatus === 'OK' ? 'active' : ''}" data-status="OK">✓</button><button class="btn-pp ${currentStatus === 'PP' ? 'active' : ''}" data-status="PP">⚠</button><button class="btn-falta ${currentStatus === 'FALTA' ? 'active' : ''}" data-status="FALTA">❌</button></div>`; itemListEl.appendChild(card); }); itemListEl.addEventListener('click', handleStatusClick); }
-function handleStatusClick(e) { const button = e.target.closest('button[data-status]'); if (!button) return; const { itemId, status: newStatus } = button.dataset; localChanges[itemId] = { status: newStatus }; saveLocalChanges(); updateCardUI(itemId, newStatus); updateSendButtonVisibility(); }
-function updateCardUI(itemId, newStatus) { const card = document.getElementById(`card-${itemId}`); if (!card) return; const buttonContainer = card.querySelector('.status-buttons'); card.className = 'item-card'; card.classList.add(`status-${newStatus.toLowerCase()}`); buttonContainer.querySelectorAll('button').forEach(btn => { btn.classList.remove('active'); if (btn.dataset.status === newStatus) { btn.classList.add('active'); } }); }
-function saveLocalChanges() { localStorage.setItem('rinEstoqueRascunho', JSON.stringify(localChanges)); }
-function loadLocalChanges() { const saved = localStorage.getItem('rinEstoqueRascunho'); if (saved) { localChanges = JSON.parse(saved); } }
-function clearLocalChanges() { localStorage.removeItem('rinEstoqueRascunho'); }
-function updateSendButtonVisibility() { if (Object.keys(localChanges).length > 0) { sendBtnEl.classList.remove('hidden'); } else { sendBtnEl.classList.add('hidden'); } }
+async function saveStaged() {
+  if (staged.size === 0) return;
+
+  const updates = [];
+  for (const [id, patch] of staged.entries()) {
+    updates.push({ id, ...patch });
+  }
+
+  const { data, error } = await supabase
+    .from('itens')
+    .upsert(updates, { onConflict: 'id' }) // atualiza pela PK
+    .select();
+
+  if (error) {
+    console.error('Erro ao salvar alterações:', error);
+    return;
+  }
+
+  // Sincroniza estado local
+  for (const row of data) {
+    const idx = allItems.findIndex(i => i.id === row.id);
+    if (idx >= 0) allItems[idx] = { ...allItems[idx], ...row };
+  }
+  staged.clear();
+  selected.clear();
+  render();
+}
+
+async function addItem(payload) {
+  const { data, error } = await supabase
+    .from('itens')
+    .insert([payload])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Erro ao adicionar item:', error);
+    return null;
+  }
+  allItems.push(data);
+  allItems.sort((a,b)=> a.nome.localeCompare(b.nome));
+  render();
+  return data;
+}
+
+function bulkStage(status) {
+  for (const id of selected) {
+    stageStatus(id, status);
+  }
+}
+
+// ==== EVENTOS ===================================================================================
+$tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    $tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentView = tab.dataset.view;
+    render();
+  });
+});
+
+$search.addEventListener('input', render);
+$filter.addEventListener('change', render);
+$refresh.addEventListener('click', fetchItems);
+
+$markOk.addEventListener('click', () => bulkStage('OK'));
+$markWarn.addEventListener('click', () => bulkStage('ALERTA'));
+$markBad.addEventListener('click', () => bulkStage('FALTA'));
+$save.addEventListener('click', saveStaged);
+
+$addForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const payload = {
+    nome: $nome.value.trim(),
+    categoria: $categoria.value.trim() || null,
+    unidade: $unidade.value.trim() || null,
+    parMin: $parMin.value ? Number($parMin.value) : null,
+    status: 'OK'
+  };
+  if (!payload.nome) return;
+  await addItem(payload);
+  $addForm.reset();
+  $nome.focus();
+});
+
+// ==== BOOT ======================================================================================
+fetchItems();
