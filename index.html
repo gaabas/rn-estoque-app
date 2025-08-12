@@ -1,140 +1,209 @@
-<!doctype html>
-<html lang="pt-br">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>RIN – Checagem de Estoque</title>
-  <link rel="stylesheet" href="./style.css" />
-  <style>
-    /* ===== Tema claro ===== */
-    :root{
-      --bg:#fff; --text:#0f172a; --muted:#475569;
-      --card:#fff; --border:#e2e8f0; --shadow:0 6px 20px rgba(2,6,23,.06);
-      --ok:#16a34a; --warn:#d97706; --bad:#dc2626;
-      --radius:14px;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial;background:var(--bg);color:var(--text)}
+<style>
+  /* ===== Tema claro ===== */
+  :root{
+    --bg:#f8fafc; /* Levemente mais claro */
+    --text:#0f172a;
+    --muted:#475569;
+    --card:#fff;
+    --border:#e2e8f0;
+    --shadow:0 6px 20px rgba(2,6,23,.06);
+    --ok:#16a34a; --warn:#d97706; --bad:#dc2626;
+    --radius:14px;
+    --focus-ring: 0 0 0 3px rgba(99, 102, 241, 0.4); /* Anel de foco acessível */
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    -webkit-tap-highlight-color: transparent; /* Remove o destaque cinza no clique em iOS */
+    overscroll-behavior: none; /* Previne pull-to-refresh em mobile */
+  }
 
-    /* ===== Header ===== */
-    header{
-      position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--border);
-      padding:10px 12px
+  /* ===== Header ===== */
+  header{
+    position:sticky;top:0;z-index:10;
+    background:#fff;
+    border-bottom:1px solid var(--border);
+    padding:10px 12px;
+    box-shadow:var(--shadow); /* Adiciona sombra para flutuar */
+  }
+  .header-wrap{
+    display:grid;
+    gap:8px;
+    grid-template-columns:1fr auto;
+    max-width:1200px; /* Limita largura em telas grandes */
+    margin:0 auto;
+  }
+  .tabs{display:flex;gap:8px;flex-wrap:wrap}
+  .tab{
+    padding:8px 12px;border-radius:10px;
+    background:#fff;border:1px solid var(--border);
+    cursor:pointer;
+    transition:background .2s, border-color .2s;
+  }
+  .tab.active{
+    background:#e0e7ff; /* Cor mais forte para ativo */
+    border-color:#a5b4fc;
+    color:#312e81; /* Texto mais escuro */
+    font-weight:600;
+  }
+  .tab:hover:not(.active){background:#f1f5f9;}
+  .tab:focus-visible{outline:2px solid var(--focus-ring); outline-offset:2px;}
+
+  .toolbar{
+    display:flex; /* Usar flexbox para melhor controle em responsividade */
+    flex-wrap:wrap; /* Permite quebrar linha */
+    gap:8px;
+    align-items:center;
+    justify-content: flex-end; /* Alinha à direita por padrão */
+  }
+  .toolbar input, .toolbar select, .toolbar button{
+    background:#fff;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px;
+    font-size:1rem; /* Garante tamanho de fonte consistente */
+    transition:border-color .2s, background .2s, box-shadow .2s;
+  }
+  .toolbar input:focus-visible, .toolbar select:focus-visible, .toolbar button:focus-visible{
+    outline:none;
+    border-color:#6366f1;
+    box-shadow:var(--focus-ring);
+  }
+  .toolbar button{cursor:pointer;}
+  .toolbar button.ghost{background:#f8fafc;} /* fundo mais claro */
+  .toolbar button.ghost:hover{background:#f1f5f9;}
+
+  .badge{font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid var(--border);background:#f1f5f9;display:none}
+
+  /* ===== Conteúdo ===== */
+  .container{
+    padding:12px 12px 96px; /* padding-bottom evita ficar atrás do rodapé */
+    max-width:1200px; /* Limita largura em telas grandes */
+    margin:0 auto;
+  }
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+  .card{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:var(--radius);padding:12px;
+    display:flex;flex-direction:column;gap:8px;
+    box-shadow:var(--shadow);
+    transition:box-shadow .2s;
+  }
+  .card:hover{box-shadow:0 8px 25px rgba(2,6,23,.08);}
+
+  .name{font-weight:700}
+  .meta{color:var(--muted);font-size:12px;display:flex;gap:10px;flex-wrap:wrap}
+
+  .status{
+    display:flex;
+    gap:6px;
+    justify-content: flex-end; /* Alinha o pill à direita */
+  }
+  .pill{
+    padding:6px 10px;border-radius:999px;font-size:12px;
+    border:1px solid transparent;
+    cursor:pointer; /* Indica que é clicável */
+    transition:background .2s, border-color .2s, transform .1s;
+  }
+  .pill:hover{transform: translateY(-1px);} /* Efeito de leve elevação */
+  .pill:active{transform: translateY(0); box-shadow: inset 0 1px 3px rgba(0,0,0,.1);} /* Efeito de clique */
+  .pill:focus-visible{outline:none; border-color:#6366f1; box-shadow:var(--focus-ring);}
+
+  .pill.ok{background:rgba(22,163,74,.10);border-color:#86efac;color:#065f46}
+  .pill.warn{background:rgba(217,119,6,.12);border-color:#fed7aa;color:#7c2d12}
+  .pill.bad{background:rgba(220,38,38,.10);border-color:#fecaca;color:#7f1d1d}
+
+  /* Removendo a barra de botões dentro dos cards */
+  .btnbar { display: none; }
+
+  button{
+    cursor:pointer;border-radius:10px;border:1px solid var(--border);
+    background:#f8fafc;color:var(--text);padding:8px 10px;
+    font-size:1rem; /* Garante tamanho de fonte consistente */
+    transition:background .2s, border-color .2s, box-shadow .2s;
+  }
+  button:hover{background:#f1f5f9;}
+  button:active{transform: translateY(1px); box-shadow: inset 0 1px 3px rgba(0,0,0,.1);}
+  button:focus-visible{outline:none; border-color:#6366f1; box-shadow:var(--focus-ring);}
+
+  button.primary{background:#e0e7ff;border-color:#c7d2fe;color:#312e81; font-weight:600;}
+  button.primary:hover{background:#c7d2fe;}
+  button.ghost{background:transparent;} /* Fundo transparente */
+  button.ghost:hover{background:#f1f5f9;}
+
+
+  .empty{color:#64748b;font-style:italic;padding:24px 0; text-align:center;}
+
+  /* ===== Rodapé ===== */
+  .footerbar{
+    position:fixed;left:0;right:0;bottom:0;
+    background:#fff;border-top:1px solid var(--border);
+    padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+    display:flex;
+    gap:8px;
+    justify-content:flex-end;
+    box-shadow:0 -6px 20px rgba(2,6,23,.06); /* Adiciona sombra para flutuar */
+    flex-wrap: wrap; /* Permite que os botões quebrem linha */
+  }
+  .footerbar button{
+    flex-shrink: 0; /* Evita que os botões encolham */
+  }
+
+
+  /* ===== Gestor form ===== */
+  form.add-item{
+    display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;margin:8px 0 16px;
+    padding:12px; /* Adiciona padding para parecer mais com um card */
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+  }
+  form.add-item input{
+    background:#fff;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px;
+    font-size:1rem;
+    transition:border-color .2s, box-shadow .2s;
+  }
+  form.add-item input:focus-visible{
+    outline:none;
+    border-color:#6366f1;
+    box-shadow:var(--focus-ring);
+  }
+
+  /* ===== Responsivo ===== */
+  @media (max-width:900px){
+    .grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+  }
+  @media (max-width:640px){
+    .header-wrap{
+      grid-template-columns:1fr; /* Tabs no topo, toolbar abaixo */
     }
-    .header-wrap{display:grid;gap:8px;grid-template-columns:1fr auto}
-    .tabs{display:flex;gap:8px;flex-wrap:wrap}
-    .tab{padding:8px 12px;border-radius:10px;background:#fff;border:1px solid var(--border);cursor:pointer}
-    .tab.active{background:#eef2ff;border-color:#c7d2fe}
     .toolbar{
-      display:grid;gap:8px;align-items:center;
-      grid-template-columns:1fr auto auto auto;
+      flex-direction: column; /* Empilha os itens verticalmente */
+      align-items: stretch; /* Estica os itens para preencher a largura */
     }
-    .toolbar input,.toolbar select{
-      background:#fff;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px
+    .toolbar input, .toolbar select, .toolbar button{
+      width: 100%; /* Ocupa a largura total disponível */
     }
-    .toolbar button{padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#fff}
-    .badge{font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid var(--border);background:#f1f5f9;display:none}
+    #search{order: -1;} /* Coloca a busca no topo da toolbar */
 
-    /* ===== Conteúdo ===== */
-    .container{padding:12px 12px 96px} /* padding-bottom evita ficar atrás do rodapé */
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px;display:flex;flex-direction:column;gap:8px;box-shadow:var(--shadow)}
-    .name{font-weight:700}
-    .meta{color:var(--muted);font-size:12px;display:flex;gap:10px;flex-wrap:wrap}
-    .status{display:flex;gap:6px}
-    .pill{padding:6px 10px;border-radius:999px;font-size:12px;border:1px solid transparent}
-    .pill.ok{background:rgba(22,163,74,.10);border-color:#86efac;color:#065f46}
-    .pill.warn{background:rgba(217,119,6,.12);border-color:#fed7aa;color:#7c2d12}
-    .pill.bad{background:rgba(220,38,38,.10);border-color:#fecaca;color:#7f1d1d}
-    .btnbar{display:flex;gap:8px;flex-wrap:wrap}
-    button{cursor:pointer;border-radius:10px;border:1px solid var(--border);background:#f8fafc;color:var(--text);padding:8px 10px}
-    button.primary{background:#e0e7ff;border-color:#c7d2fe}
-    button.ghost{background:#fff}
-    .empty{color:#64748b;font-style:italic;padding:24px 0}
+    .grid{grid-template-columns:1fr}
 
-    /* ===== Rodapé ===== */
+    /* Rodapé em grid: Exportar e Salvar em linhas inteiras; agora TODOS os botões */
     .footerbar{
-      position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--border);
-      padding:10px 12px calc(10px + env(safe-area-inset-bottom));
-      display:flex;gap:8px;justify-content:flex-end
+      display:grid; /* Mudar para grid para empilhar */
+      grid-template-columns:1fr; /* Uma coluna, todos empilhados */
+      gap:8px;
+      justify-content: unset; /* Desfaz o justify-content flexbox */
+    }
+    .footerbar button{
+      width: 100%; /* Cada botão ocupa a largura total */
     }
 
-    /* ===== Gestor form ===== */
-    form.add-item{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;margin:8px 0 16px}
-    form.add-item input{background:#fff;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
-
-    /* ===== Responsivo ===== */
-    @media (max-width:900px){
-      .grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
-    }
-    @media (max-width:640px){
-      .header-wrap{grid-template-columns:1fr}
-      .toolbar{
-        grid-template-columns:1fr 1fr; /* busca em cima, depois filtro/rec/gestor */
-      }
-      #search{grid-column:1/-1}
-      .grid{grid-template-columns:1fr}
-      /* Rodapé em grid: Exportar e Salvar em linhas inteiras; esconde ações em massa (OK/⚠/❌) para caber */
-      .footerbar{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-      #save{grid-column:1/-1}
-      #exportCsv{grid-column:1/-1}
-      #markOk,#markWarn,#markBad{display:none}
-      /* Form do Gestor mais compacto */
-      form.add-item{grid-template-columns:1fr 1fr}
-      form.add-item #nome{grid-column:1/-1}
-    }
-    @media (max-width:380px){
-      .toolbar{grid-template-columns:1fr}
-      #filter,#refresh,#adminBtn{width:100%}
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <div class="header-wrap">
-      <div class="tabs">
-        <button class="tab active" data-view="producao">Produção</button>
-        <button class="tab" data-view="compras">Compras</button>
-      </div>
-      <div class="toolbar">
-        <input id="search" type="search" placeholder="Buscar item…" />
-        <select id="filter">
-          <option value="TODOS">Todos</option>
-          <option value="OK">OK</option>
-          <option value="ALERTA">⚠ alerta</option>
-          <option value="FALTA">❌ falta</option>
-        </select>
-        <button id="refresh" class="ghost">Recarregar</button>
-        <div class="admin">
-          <span id="adminBadge" class="badge">Gestor</span>
-          <button id="adminBtn" class="ghost">Entrar como Gestor</button>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <div class="container">
-    <!-- VISÍVEL apenas no modo Gestor -->
-    <form class="add-item" id="addForm" style="display:none">
-      <input id="nome" placeholder="Nome do item" />
-      <input id="categoria" placeholder="Categoria" />
-      <input id="unidade" placeholder="Unidade (kg, un, pct…)" />
-      <input id="parMin" type="number" min="0" placeholder="Par mín." />
-      <button type="submit" class="primary">Adicionar</button>
-    </form>
-
-    <div id="list" class="grid"></div>
-    <div id="empty" class="empty" style="display:none;">Nenhum item encontrado.</div>
-  </div>
-
-  <div class="footerbar">
-    <button id="exportCsv" class="ghost">Exportar CSV (lista de compras)</button>
-    <button id="markOk">Marcar selecionados como OK</button>
-    <button id="markWarn">Marcar selecionados como ⚠ Alerta</button>
-    <button id="markBad">Marcar selecionados como ❌ Falta</button>
-    <button id="save" class="primary">Salvar alterações</button>
-  </div>
-
-  <script type="module" src="./app.js"></script>
-</body>
-</html>
+    /* Form do Gestor mais compacto */
+    form.add-item{grid-template-columns:1fr} /* Todos os campos em uma coluna */
+    form.add-item #nome{grid-column:1/-1} /* Nome já era full width, mantido */
+    form.add-item #categoria, form.add-item #unidade, form.add-item #parMin { grid-column: auto; } /* Desfaz o span para eles */
+  }
+  /* Removemos o breakpoint de 380px pois as regras do 640px já cobrem melhor */
+</style>
