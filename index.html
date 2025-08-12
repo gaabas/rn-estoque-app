@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>RIN – Checagem de Estoque</title>
   
-  <!-- ================================== CSS ATUALIZADO ================================== -->
   <style>
+    /* ===== Tema e Variáveis Globais ===== */
     :root{
       --bg:#f8fafc; --text:#0f172a; --muted:#475569;
       --card:#fff; --border:#e2e8f0; --shadow:0 6px 20px rgba(2,6,23,.06);
@@ -20,16 +20,14 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* ===== Header (AGORA COM AUTO-HIDE) ===== */
+    /* ===== Header (com Auto-Hide) ===== */
     header{
       position:sticky; top:0; z-index:10;
-      background:rgba(255,255,255,0.85); /* Fundo semi-transparente */
-      backdrop-filter: blur(8px); /* Efeito de vidro fosco */
-      -webkit-backdrop-filter: blur(8px);
+      background:rgba(255,255,255,0.85);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
       border-bottom:1px solid var(--border); padding:10px 12px;
-      transition: transform 0.3s ease-in-out; /* ANIMAÇÃO DE ENTRADA/SAÍDA */
+      transition: transform 0.3s ease-in-out;
     }
-    /* CLASSE PARA ESCONDER O HEADER */
     header.hidden {
       transform: translateY(-100%);
     }
@@ -53,16 +51,13 @@
       background:#fff;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px;
       font-size:1rem; transition:border-color .2s, box-shadow .2s;
     }
-    .toolbar button.icon-btn { /* Estilo para o novo botão de exportar */
-        padding: 8px;
-        line-height: 1;
-        font-size: 1.2rem;
+    .toolbar button.icon-btn {
+        padding: 8px; line-height: 1; font-size: 1.2rem;
     }
 
-    /* ===== Conteúdo ===== */
+    /* ===== Conteúdo Principal ===== */
     .container{
-      padding:12px 12px 24px; /* Padding inferior reduzido, pois o footer some */
-      max-width:1200px; margin:0 auto;
+      padding:12px 12px 24px; max-width:1200px; margin:0 auto;
     }
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
     .card{
@@ -70,9 +65,8 @@
       border-radius:var(--radius);padding:12px;
       display:flex;flex-direction:column;gap:8px; box-shadow:var(--shadow);
     }
-    .card.selected { /* Destaque visual para cards selecionados */
-        border-color: #a5b4fc;
-        box-shadow: 0 0 0 2px #a5b4fc;
+    .card.selected {
+        border-color: #a5b4fc; box-shadow: 0 0 0 2px #a5b4fc;
     }
     .name{font-weight:700}
     .meta{color:var(--muted);font-size:12px;display:flex;gap:10px;flex-wrap:wrap}
@@ -85,7 +79,7 @@
     .pill.warn{background:rgba(217,119,6,.12);border-color:#fed7aa;color:#7c2d12}
     .pill.bad{background:rgba(220,38,38,.10);border-color:#fecaca;color:#7f1d1d}
 
-    /* ===== Rodapé (AGORA CONDICIONAL) ===== */
+    /* ===== Rodapé (Condicional) ===== */
     .footerbar{
       position:fixed; left:0; right:0; bottom:0; z-index: 20;
       background:rgba(255,255,255,0.85);
@@ -93,16 +87,15 @@
       border-top:1px solid var(--border);
       padding:10px 12px calc(10px + env(safe-area-inset-bottom));
       box-shadow:0 -6px 20px rgba(2,6,23,.06);
-      transition: transform 0.3s ease-in-out; /* ANIMAÇÃO DE ENTRADA/SAÍDA */
+      transition: transform 0.3s ease-in-out;
       display:grid; grid-template-columns:1fr; gap:8px;
     }
-    /* CLASSE PARA ESCONDER O RODAPÉ */
     .footerbar.hidden {
         transform: translateY(100%);
     }
     .footerbar button{ width: 100%; }
 
-    /* Outros estilos permanecem os mesmos */
+    /* ===== Outros Estilos ===== */
     .badge{font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid var(--border);background:#f1f5f9;display:none}
     .empty{color:#64748b;font-style:italic;padding:24px 0; text-align:center;}
     button{cursor:pointer;border-radius:10px;border:1px solid var(--border);background:#f8fafc;color:var(--text);padding:8px 10px;font-size:1rem;}
@@ -111,7 +104,7 @@
     form.add-item input{background:#fff;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:1rem;}
 
     /* ===== Media Queries ===== */
-    @media (min-width: 641px) { /* Estilos para telas maiores que mobile */
+    @media (min-width: 641px) {
         .header-wrap{ grid-template-columns: auto 1fr; }
         .footerbar {
             display:flex; flex-wrap: wrap; justify-content: flex-end;
@@ -167,7 +160,7 @@
     <div id="empty" class="empty" style="display:none;">Nenhum item encontrado.</div>
   </div>
 
-  <div class="footerbar hidden"> <!-- Inicia escondido -->
+  <div class="footerbar hidden">
     <button id="markOk">Marcar selecionados como OK</button>
     <button id="markWarn">Marcar selecionados como ⚠ Alerta</button>
     <button id="markBad">Marcar selecionados como ❌ Falta</button>
@@ -175,16 +168,21 @@
   </div>
 
   <script type="module">
-    // ================================== JAVASCRIPT ATUALIZADO ==================================
+    // ================================== JAVASCRIPT COMPLETO E CORRIGIDO ==================================
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
+    // ====== CONFIG ================================================================================
     const SUPABASE_URL = 'https://slrjqqzzxxpywquphvjz.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNscmpxcXp6eHhweXdxdXBodmp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2OTYyMjksImV4cCI6MjA3MDI3MjIyOX0.JuzZMOC2X4NQUXeVdYBoQDY5pN-2O2igPK0zjNdcjcU';
     const GESTOR_PIN = '3461';
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    let currentView = 'producao', allItems = [], filtered = [], staged = new Map(), selected = new Set(), isGestor = !!localStorage.getItem('rin_is_gestor');
 
+    // ====== ESTADO ================================================================================
+    let currentView = 'producao', allItems = [], filtered = [], staged = new Map(), selected = new Set(), isGestor = !!localStorage.getItem('rin_is_gestor');
+    let lastScrollY = window.scrollY;
+
+    // ====== ELEMENTOS =============================================================================
     const $header = document.querySelector('header');
     const $footerbar = document.querySelector('.footerbar');
     const $tabs = document.querySelectorAll('.tab');
@@ -204,45 +202,33 @@
     const $save = document.getElementById('save');
     const $exportCsv = document.getElementById('exportCsv');
     const $adminBtn = document.getElementById('adminBtn');
+    const $adminBadge = document.getElementById('adminBadge');
 
-    // ... (funções de helper, applyFilters, CRUD, etc. não mudam muito) ...
-    // Vou colar apenas as que mudaram e as novas. O resto permanece igual.
-
+    // ====== HELPERS ===============================================================================
     const statusToEmoji = (s) => ({
         'OK': { label: 'OK', cls: 'ok', next: 'ALERTA' },
         'ALERTA': { label: '⚠ Alerta', cls: 'warn', next: 'FALTA' },
         'FALTA': { label: '❌ Falta', cls: 'bad', next: 'OK' }
     }[s] || { label: s, cls: '', next: 'OK' });
+    
+    function normalize(str) { return (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
 
-    function notify(msg) { /* ...sem alteração... */ }
-    function normalize(str) { /* ...sem alteração... */ }
-    function updateGestorUI() { /* ...sem alteração... */ }
-    function applyFilters() { /* ...sem alteração... */ }
-    async function fetchItems() { /* ...sem alteração... */ }
-    async function addItem(payload) { /* ...sem alteração... */ }
-    async function saveStaged() { /* ...sem alteração, mas agora também esconde o footer */
-        if (staged.size === 0) return;
-        $save.disabled = true; $save.textContent = 'Salvando…';
-        try {
-            const ops = Array.from(staged.entries()).map(([id, patch]) => supabase.from('itens').update(patch).eq('id', id));
-            await Promise.all(ops);
-            await fetchItems();
-            staged.clear();
-            selected.clear();
-            updateFooterVisibility(); // Esconde o rodapé
-            notify('Alterações salvas');
-        } catch (e) {
-            console.error('Erro inesperado no save:', e); alert('Erro inesperado ao salvar.');
-        } finally {
-            updateSaveButton();
-        }
+    function notify(msg) {
+        const n = document.createElement('div');
+        n.textContent = msg;
+        Object.assign(n.style, {
+            position: 'fixed', right: '16px', bottom: '80px', background: '#111827', color: '#f8fafc',
+            border: '1px solid #1f2937', borderRadius: '10px', padding: '8px 12px', zIndex: '9999',
+            boxShadow: '0 6px 20px rgba(0,0,0,.20)', opacity: '0', transform: 'translateY(10px)',
+            transition: 'opacity 0.3s, transform 0.3s'
+        });
+        document.body.appendChild(n);
+        requestAnimationFrame(() => { n.style.opacity = '1'; n.style.transform = 'translateY(0)'; });
+        setTimeout(() => {
+            n.style.opacity = '0'; n.style.transform = 'translateY(10px)';
+            setTimeout(() => n.remove(), 300);
+        }, 2000);
     }
-    function toCsv(rows){ /* ...sem alteração... */ }
-    function download(filename, text){ /* ...sem alteração... */ }
-    function exportCsv(){ /* ...sem alteração... */ }
-
-
-    // ================== NOVAS FUNÇÕES E FUNÇÕES MODIFICADAS ==================
 
     function updateFooterVisibility() {
         const shouldBeVisible = staged.size > 0 || selected.size > 0;
@@ -253,9 +239,61 @@
         const n = staged.size;
         $save.textContent = n ? `Salvar alterações (${n})` : 'Salvar alterações';
         $save.disabled = n === 0;
-        updateFooterVisibility(); // Atualiza a visibilidade do rodapé também
+        updateFooterVisibility();
     }
     
+    function updateGestorUI() {
+        if ($addForm) $addForm.style.display = isGestor ? 'grid' : 'none';
+        if ($adminBadge) $adminBadge.style.display = isGestor ? 'inline-block' : 'none';
+        if ($adminBtn) $adminBtn.textContent = isGestor ? 'Sair do modo Gestor' : 'Entrar como Gestor';
+    }
+
+    function applyFilters() {
+      const q = normalize($search?.value);
+      const f = $filter?.value || 'TODOS';
+      let rows = allItems.slice();
+      if (currentView === 'compras') {
+        rows = rows.filter(r => (staged.get(r.id)?.status || r.status) !== 'OK');
+      }
+      if (f !== 'TODOS') {
+        rows = rows.filter(r => (staged.get(r.id)?.status || r.status) === f);
+      }
+      if (q) {
+        rows = rows.filter(r =>
+          normalize(r.nome).includes(q) ||
+          normalize(r.categoria).includes(q) ||
+          normalize(r.unidade).includes(q)
+        );
+      }
+      filtered = rows;
+    }
+    
+    function toCsv(rows) {
+      const header = ['nome','categoria','unidade','parMin','status'];
+      const esc = (v) => {
+        const s = v == null ? '' : String(v);
+        return /[",;\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+      };
+      const lines = [header.join(';')];
+      for (const r of rows) {
+        const status = staged.get(r.id)?.status || r.status;
+        lines.push([r.nome, r.categoria || '', r.unidade || '', r.parMin ?? '', status].map(esc).join(';'));
+      }
+      return lines.join('\n');
+    }
+
+    function download(filename, text) {
+      const blob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename; a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+    
+    // ====== RENDER =================================================================================
     function render() {
         applyFilters();
         $list.innerHTML = '';
@@ -275,7 +313,7 @@
             checkbox.onchange = (e) => {
                 e.target.checked ? selected.add(item.id) : selected.delete(item.id);
                 card.classList.toggle('selected', e.target.checked);
-                updateFooterVisibility(); // Mostra o rodapé ao selecionar
+                updateFooterVisibility();
             };
 
             const pill = document.createElement('span');
@@ -298,9 +336,10 @@
         }
     }
 
+    // ====== AÇÕES ==================================================================================
     function stageStatus(id, status) {
         staged.set(id, { ...staged.get(id), status });
-        updateSaveButton(); // Isso já chama updateFooterVisibility
+        updateSaveButton();
         render();
     }
 
@@ -308,38 +347,108 @@
         if (selected.size === 0) { notify('Nenhum item selecionado!'); return; }
         for (const id of selected) stageStatus(id, status);
     }
-
-    // ================== LÓGICA DE EVENTOS (com adições) ==================
-
-    // AUTO-HIDE HEADER
-    let lastScrollY = window.scrollY;
-    window.addEventListener('scroll', () => {
-        if (window.innerWidth > 640) return; // Só aplica no mobile
-        const currentScrollY = window.scrollY;
-        if (currentScrollY > lastScrollY && currentScrollY > 60) {
-            $header.classList.add('hidden');
+    
+    function exportCsv() {
+        let rows;
+        if (currentView === 'compras') {
+            rows = filtered.slice();
         } else {
-            $header.classList.remove('hidden');
+            rows = (allItems).filter(r => (staged.get(r.id)?.status || r.status) !== 'OK');
         }
+        if (!rows.length) { notify('Nada para exportar'); return; }
+        const csv = toCsv(rows);
+        const stamp = new Date().toISOString().slice(0,10);
+        download(`lista-compras-${stamp}.csv`, csv);
+        notify('CSV gerado');
+    }
+
+    // ====== SUPABASE - CRUD =========================================================================
+    async function fetchItems() {
+        const { data, error } = await supabase.from('itens').select('*').order('nome', { ascending: true });
+        if (error) { console.error('Erro ao carregar itens:', error); notify('Erro ao carregar itens.'); return; }
+        allItems = data || [];
+        render();
+    }
+
+    async function addItem(payload) {
+        const { data, error } = await supabase.from('itens').insert([payload]).select().single();
+        if (error) { console.error('Erro ao adicionar item:', error); alert('Não consegui adicionar o item.'); return; }
+        allItems.push(data);
+        allItems.sort((a,b)=> a.nome.localeCompare(b.nome));
+        render();
+        notify('Item adicionado!');
+    }
+
+    async function saveStaged() {
+        if (staged.size === 0) return;
+        $save.disabled = true; $save.textContent = 'Salvando…';
+        try {
+            const ops = Array.from(staged.entries()).map(([id, patch]) => supabase.from('itens').update(patch).eq('id', id));
+            await Promise.all(ops);
+            await fetchItems();
+            staged.clear();
+            selected.clear();
+            updateFooterVisibility();
+            notify('Alterações salvas');
+        } catch (e) {
+            console.error('Erro inesperado no save:', e); alert('Erro inesperado ao salvar.');
+        } finally {
+            updateSaveButton();
+        }
+    }
+    
+    // ====== EVENTOS ===============================================================================
+    window.addEventListener('scroll', () => {
+        if (window.innerWidth > 640) return;
+        const currentScrollY = window.scrollY;
+        $header.classList.toggle('hidden', currentScrollY > lastScrollY && currentScrollY > 60);
         lastScrollY = currentScrollY;
     });
 
-    // EVENT LISTENERS EXISTENTES
-    $tabs.forEach(tab => tab.addEventListener('click', () => { /* ...sem alteração... */ }));
-    $search?.addEventListener('input', render);
-    $filter?.addEventListener('change', render);
-    $refresh?.addEventListener('click', fetchItems);
+    $tabs.forEach(tab => tab.addEventListener('click', () => {
+        $tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentView = tab.dataset.view;
+        render();
+    }));
+
+    $search.addEventListener('input', render);
+    $filter.addEventListener('change', render);
+    $refresh.addEventListener('click', fetchItems);
     $markOk.addEventListener('click', () => bulkStage('OK'));
     $markWarn.addEventListener('click', () => bulkStage('ALERTA'));
     $markBad.addEventListener('click', () => bulkStage('FALTA'));
     $save.addEventListener('click', saveStaged);
     $exportCsv.addEventListener('click', exportCsv);
-    $addForm?.addEventListener('submit', async (e) => { /* ...sem alteração... */ });
-    $adminBtn?.addEventListener('click', () => { /* ...sem alteração... */ });
 
-    // BOOT
+    $addForm.addEventListener('submit', async (e) => {
+        e.preventDefault(); if (!isGestor) return;
+        const payload = {
+            nome: ($nome.value || '').trim(), categoria: ($categoria.value || '').trim() || null,
+            unidade: ($unidade.value || '').trim() || null, parMin: $parMin.value ? Number($parMin.value) : null,
+            status: 'OK'
+        };
+        if (!payload.nome) { notify('O nome do item é obrigatório!'); $nome.focus(); return; }
+        await addItem(payload);
+        $addForm.reset(); $nome.focus();
+    });
+
+    $adminBtn.addEventListener('click', () => {
+        if (isGestor) {
+            isGestor = false; localStorage.removeItem('rin_is_gestor');
+            updateGestorUI(); notify('Saiu do modo Gestor');
+            return;
+        }
+        const pin = prompt('PIN do Gestor:');
+        if (pin === GESTOR_PIN) {
+            isGestor = true; localStorage.setItem('rin_is_gestor', '1');
+            updateGestorUI(); notify('Modo Gestor ativado');
+        } else if (pin !== null) { alert('PIN incorreto.'); }
+    });
+
+    // ====== BOOT ==================================================================================
     updateGestorUI();
-    updateSaveButton(); // Isso já esconde o footer inicialmente
+    updateSaveButton();
     fetchItems();
   </script>
 </body>
