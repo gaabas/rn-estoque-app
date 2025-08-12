@@ -1,4 +1,4 @@
-// app.js — RIN v2 (Supabase) — Tema Claro + Modo Gestor + Exportar CSV
+// app.js — RIN v2 (Supabase) — Tema Claro + Modo Gestor + Exportar CSV (Otimizado para Mobile)
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -51,10 +51,10 @@ const $adminBadge = document.getElementById('adminBadge');
 // ====== HELPERS ===============================================================================
 const statusToEmoji = (s) => {
   switch (s) {
-    case 'OK': return { label: 'OK', cls: 'ok' };
-    case 'ALERTA': return { label: '⚠ alerta', cls: 'warn' };
-    case 'FALTA': return { label: '❌ falta', cls: 'bad' };
-    default: return { label: s, cls: '' };
+    case 'OK': return { label: 'OK', cls: 'ok', next: 'ALERTA' };
+    case 'ALERTA': return { label: '⚠ Alerta', cls: 'warn', next: 'FALTA' };
+    case 'FALTA': return { label: '❌ Falta', cls: 'bad', next: 'OK' };
+    default: return { label: s, cls: '', next: 'OK' }; // Default para OK
   }
 };
 
@@ -75,8 +75,19 @@ function notify(msg) {
   n.style.padding = '8px 12px';
   n.style.boxShadow = '0 6px 20px rgba(0,0,0,.20)';
   n.style.zIndex = '9999';
+  n.style.opacity = '0'; // Começa transparente
+  n.style.transition = 'opacity 0.3s ease-in-out'; // Transição suave
   document.body.appendChild(n);
-  setTimeout(() => n.remove(), 1600);
+  
+  // Animação de entrada
+  requestAnimationFrame(() => {
+    n.style.opacity = '1';
+  });
+
+  setTimeout(() => {
+    n.style.opacity = '0'; // Animação de saída
+    setTimeout(() => n.remove(), 300); // Remove depois da transição
+  }, 1600);
 }
 
 function updateSaveButton() {
@@ -131,6 +142,7 @@ function render() {
 
     const card = document.createElement('div');
     card.className = 'card';
+    card.dataset.id = item.id; // Adiciona ID para facilitar a seleção e referência
 
     const header = document.createElement('div');
     header.style.display = 'flex';
@@ -147,6 +159,8 @@ function render() {
     checkbox.addEventListener('change', (e) => {
       if (e.target.checked) selected.add(item.id);
       else selected.delete(item.id);
+      // Opcional: Adicionar classe para visual de selecionado no card
+      card.classList.toggle('selected', e.target.checked);
     });
 
     header.appendChild(name);
@@ -167,31 +181,26 @@ function render() {
     const pill = document.createElement('span');
     pill.className = `pill ${s.cls}`;
     pill.textContent = s.label;
+    
+    // TORNA O PILL CLICÁVEL PARA CICLAR STATUS
+    pill.addEventListener('click', () => {
+      const currentStatus = staged.get(item.id)?.status || item.status;
+      const nextStatus = statusToEmoji(currentStatus).next; // Obtém o próximo status do helper
+      stageStatus(item.id, nextStatus);
+    });
+
     statusRow.appendChild(pill);
 
-    const btns = document.createElement('div');
-    btns.className = 'btnbar';
-
-    const bOk = document.createElement('button');
-    bOk.textContent = 'OK';
-    bOk.addEventListener('click', () => { stageStatus(item.id, 'OK'); });
-
-    const bWarn = document.createElement('button');
-    bWarn.textContent = '⚠ Alerta';
-    bWarn.addEventListener('click', () => { stageStatus(item.id, 'ALERTA'); });
-
-    const bBad = document.createElement('button');
-    bBad.textContent = '❌ Falta';
-    bBad.addEventListener('click', () => { stageStatus(item.id, 'FALTA'); });
-
-    btns.appendChild(bOk);
-    btns.appendChild(bWarn);
-    btns.appendChild(bBad);
+    // REMOVIDO: botões individuais de OK/Alerta/Falta para mobile
+    // const btns = document.createElement('div');
+    // btns.className = 'btnbar';
+    // ... (restante dos botões individuais removido)
+    // card.appendChild(btns);
 
     card.appendChild(header);
     card.appendChild(meta);
     card.appendChild(statusRow);
-    card.appendChild(btns);
+    // Btns já foram removidos
 
     $list.appendChild(card);
   }
@@ -202,12 +211,17 @@ function stageStatus(id, status) {
   const current = staged.get(id) || {};
   staged.set(id, { ...current, status });
   updateSaveButton();
-  render();
+  render(); // Re-renderiza para atualizar o visual do pill
 }
 
 function bulkStage(status) {
+  if (selected.size === 0) {
+    notify('Nenhum item selecionado!');
+    return;
+  }
   for (const id of selected) stageStatus(id, status);
   updateSaveButton();
+  render(); // Re-renderiza para atualizar os cards
 }
 
 // ====== SUPABASE – CRUD ========================================================================
@@ -219,6 +233,7 @@ async function fetchItems() {
 
   if (error) {
     console.error('Erro ao carregar itens:', error);
+    notify('Erro ao carregar itens.');
     return;
   }
   allItems = data || [];
@@ -234,12 +249,13 @@ async function addItem(payload) {
 
   if (error) {
     console.error('Erro ao adicionar item:', error);
-    alert('Não consegui adicionar o item.');
+    alert('Não consegui adicionar o item. Veja o console para detalhes.');
     return null;
   }
   allItems.push(data);
   allItems.sort((a,b)=> a.nome.localeCompare(b.nome));
   render();
+  notify('Item adicionado!');
   return data;
 }
 
@@ -267,7 +283,8 @@ async function saveStaged() {
       return;
     }
 
-    await fetchItems();
+    // Após salvar, buscar os itens novamente para refletir o estado do banco
+    await fetchItems(); 
     staged.clear();
     selected.clear();
     notify('Alterações salvas');
@@ -289,6 +306,7 @@ function buildCsvRows() {
   if (currentView === 'compras') return filtered.slice();
 
   // Na aba Produção, exporta apenas ALERTA/FALTA (independente do select 'Todos').
+  // Considera o estado atual do item (staged ou DB)
   return (filtered.length ? filtered : allItems).filter(
     r => (staged.get(r.id)?.status || r.status) !== 'OK'
   );
@@ -298,9 +316,10 @@ function toCsv(rows) {
   const header = ['nome','categoria','unidade','parMin','status'];
   const esc = (v) => {
     const s = v == null ? '' : String(v);
+    // Adiciona aspas se o valor contiver vírgula, ponto e vírgula, aspas ou nova linha
     return /[",;\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
   };
-  const lines = [header.join(';')];
+  const lines = [header.map(esc).join(';')]; // Garante que o cabeçalho também seja escapado
   for (const r of rows) {
     const status = staged.get(r.id)?.status || r.status;
     lines.push([r.nome, r.categoria || '', r.unidade || '', r.parMin ?? '', status].map(esc).join(';'));
@@ -363,7 +382,11 @@ $addForm?.addEventListener('submit', async (e) => {
     parMin: $parMin.value ? Number($parMin.value) : null,
     status: 'OK'
   };
-  if (!payload.nome) return;
+  if (!payload.nome) {
+    notify('O nome do item é obrigatório!');
+    $nome.focus();
+    return;
+  }
   await addItem(payload);
   $addForm.reset();
   $nome.focus();
