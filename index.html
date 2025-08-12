@@ -13,29 +13,18 @@
       --radius:14px; --primary-color: #4f46e5;
     }
     *{box-sizing:border-box}
-    body{
-      margin:0; font-family:system-ui,-apple-system,sans-serif;
-      background:var(--bg); color:var(--text); -webkit-tap-highlight-color: transparent;
-    }
+    body{ margin:0; font-family:system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--text); -webkit-tap-highlight-color: transparent; }
 
     /* ===== Header ===== */
-    header{
-      position:sticky; top:0; z-index:10;
-      background:rgba(255,255,255,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-      border-bottom:1px solid var(--border); padding:10px 12px;
-    }
-    .header-wrap{display:flex; gap:12px; align-items: center; max-width:1200px; margin:0 auto;}
-    .header-main-content {flex-grow: 1; display:flex; flex-direction: column; gap: 8px;}
+    header{ position:sticky; top:0; z-index:10; background:rgba(255,255,255,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom:1px solid var(--border); padding:10px 12px; }
+    .header-wrap{ display:flex; gap:12px; align-items: center; max-width:1200px; margin:0 auto; }
+    .header-main-content { flex-grow: 1; display:flex; flex-direction: column; gap: 8px; }
     .header-actions { flex-shrink: 0; }
-    .tabs{display:flex;gap:8px;}
-    .tab{padding:8px 12px;border-radius:10px; background:#fff;border:1px solid var(--border);cursor:pointer;}
-    .tab.active{background:#eef2ff; border-color:#c7d2fe; color:var(--primary-color); font-weight:600;}
-    .toolbar{display:flex; gap:8px;}
-    .toolbar input{background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:1rem;}
-    .icon-btn {
-      background:transparent; border:none; padding:8px; cursor:pointer;
-      display:flex; align-items:center; justify-content:center; color: var(--muted);
-    }
+    .tabs{ display:flex; gap:8px; }
+    .tab{ padding:8px 12px;border-radius:10px; background:#fff;border:1px solid var(--border);cursor:pointer; }
+    .tab.active{ background:#eef2ff; border-color:#c7d2fe; color:var(--primary-color); font-weight:600; }
+    .toolbar input{ background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:1rem; width: 100%; }
+    .icon-btn { background:transparent; border:none; padding:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; color: var(--muted); }
     .icon-btn:hover { color: var(--text); background: #f1f5f9; border-radius: 50%;}
     .icon-btn svg { width: 24px; height: 24px; }
     #selection-header-content { display: none; }
@@ -44,28 +33,23 @@
     #selection-info { font-weight: 600; color: var(--primary-color); }
 
     /* ===== Conteúdo e Cards ===== */
-    .container{padding:12px 12px 24px; max-width:1200px; margin:0 auto;}
+    .container{ padding:12px 12px 120px; max-width:1200px; margin:0 auto; } /* Aumenta padding-bottom para não cobrir com footer */
     .category-header { font-size: 1.1rem; font-weight: 600; color: var(--text); margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
     .category-header:first-of-type { margin-top: 0; }
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
-    .card{
-      background:var(--card);border:2px solid var(--border);
-      border-radius:var(--radius);padding:12px;
-      display:flex; gap:8px; box-shadow:var(--shadow); cursor:pointer;
-      transition: border-color .2s, box-shadow .2s;
-    }
+    .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px; }
+    .card{ background:var(--card);border:2px solid var(--border); border-radius:var(--radius);padding:12px; display:flex; gap:8px; box-shadow:var(--shadow); cursor:pointer; transition: border-color .2s, box-shadow .2s; }
     .item-checkbox { display: none; margin-top: 4px; }
     body.selection-mode .item-checkbox { display: block; }
     body.selection-mode .card { cursor: pointer; }
     .card.selected { border-color: var(--primary-color); }
     .item-details { flex-grow: 1; display: flex; flex-direction: column; gap: 8px; }
-    .name{font-weight:700}
-    .meta{color:var(--muted);font-size:13px;}
+    .name{ font-weight:700 }
+    .meta{ color:var(--muted);font-size:13px; }
     .stock-info { font-weight: 600; color: var(--text); }
     .pill{ padding:4px 10px;border-radius:999px;font-size:12px; font-weight: 500; border:1px solid; align-self: flex-start; }
-    .pill.ok{border-color:#86efac; color:#065f46; background:rgba(22,163,74,.10);}
-    .pill.warn{border-color:#fed7aa; color:#7c2d12; background:rgba(217,119,6,.12);}
-    .pill.bad{border-color:#fecaca; color:#7f1d1d; background:rgba(220,38,38,.10);}
+    .pill.ok{ border-color:#86efac; color:#065f46; background:rgba(22,163,74,.10); }
+    .pill.warn{ border-color:#fed7aa; color:#7c2d12; background:rgba(217,119,6,.12); }
+    .pill.bad{ border-color:#fecaca; color:#7f1d1d; background:rgba(220,38,38,.10); }
 
     /* ===== Rodapé ===== */
     .footerbar{
@@ -73,17 +57,19 @@
       background:rgba(255,255,255,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
       border-top:1px solid var(--border); padding:10px 12px calc(10px + env(safe-area-inset-bottom));
       box-shadow:0 -6px 20px rgba(2,6,23,.06); transition: transform 0.3s ease-in-out;
-      display:grid; grid-template-columns:1fr 1fr; gap:8px; transform: translateY(100%);
+      transform: translateY(100%); /* Começa escondido */
     }
-    body.selection-mode .footerbar { transform: translateY(0); }
-    .footerbar button { grid-column: span 1; }
-    #save { grid-column: 1 / -1; }
+    .footerbar.visible { transform: translateY(0); }
+    .footer-content { display:grid; gap:8px; }
+    .bulk-actions { display: none; grid-template-columns: 1fr 1fr; gap: 8px; }
+    body.selection-mode .bulk-actions { display: grid; }
+    .bulk-actions button { grid-column: span 1; }
 
-    /* ===== Modal de Edição de Estoque ===== */
+    /* ===== Modal de Edição de Estoque (CORRIGIDO) ===== */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.4); z-index: 99;
-      display: flex; align-items: center; justify-content: center;
+      display: flex; align-items: center; justify-content: center; /* Centralização com Flexbox */
       opacity: 0; transition: opacity .2s; pointer-events: none;
     }
     .modal-overlay.visible { opacity: 1; pointer-events: all; }
@@ -96,11 +82,7 @@
     .modal-header { font-size: 1.2rem; font-weight: 600; margin-bottom: 16px; }
     .modal-input-group { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
     .modal-input-group button { font-size: 1.5rem; width: 44px; height: 44px; padding: 0; line-height: 1; }
-    #stock-input {
-      flex-grow: 1; text-align: center; font-size: 1.8rem; font-weight: bold;
-      padding: 10px; border: 1px solid var(--border); border-radius: 10px;
-    }
-    /* Esconde as setas padrão do input number */
+    #stock-input { flex-grow: 1; text-align: center; font-size: 1.8rem; font-weight: bold; padding: 10px; border: 1px solid var(--border); border-radius: 10px; }
     #stock-input::-webkit-outer-spin-button, #stock-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     #stock-input[type=number] { -moz-appearance: textfield; }
     .modal-actions { display: flex; gap: 10px; }
@@ -108,53 +90,45 @@
 
     /* ===== Outros Estilos ===== */
     button { cursor:pointer;border-radius:10px;border:1px solid var(--border); background:#f8fafc;color:var(--text);padding:12px 10px;font-size:1rem; position: relative; transition: background .2s; }
-    button.primary{background:var(--primary-color);color:#fff; border-color:var(--primary-color); font-weight:600;}
+    button.primary{ background:var(--primary-color);color:#fff; border-color:var(--primary-color); font-weight:600; }
     button:disabled { background: #e2e8f0; color: var(--muted); cursor: not-allowed; }
     button.saving .btn-text { visibility: hidden; }
     button.saving::after { content: ''; display: block; position: absolute; top: 50%; left: 50%; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.5); border-top-color: #fff; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .empty{color:#64748b;font-style:italic;padding:24px 0; text-align:center;}
+    .empty{ color:#64748b; font-style:italic; padding:24px 0; text-align:center; }
   </style>
 </head>
 <body class="">
   
   <header>
-    <!-- O HTML do header permanece o mesmo -->
     <div class="header-wrap">
       <div class="header-main-content" id="default-header-content">
         <div class="tabs"> <button class="tab active" data-view="producao">Produção</button> <button class="tab" data-view="compras">Compras</button> </div>
-        <div class="toolbar"> <input id="search" type="search" placeholder="Buscar item…" style="width:100%;" /> </div>
+        <div class="toolbar"> <input id="search" type="search" placeholder="Buscar item…"/> </div>
       </div>
       <div id="selection-header-content"> <span id="selection-info"></span> <button id="select-all-btn" class="icon-btn" title="Selecionar Todos"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5V2a1 1 0 0 1 1-1h13a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-3v3a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h3zm1-3v11H4V8a1 1 0 0 1 .117-.458L4 7.5V6h11V2H8zm10.445 4.105L14.5 10.05l-1.945-1.945-1.414 1.414L14.5 12.879l4.359-4.359-1.414-1.414zM15 5h3v3h-3V5z"/></svg> </button> </div>
       <div class="header-actions"> <button id="edit-btn" class="icon-btn" title="Editar Itens"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M16.757 3.243a1 1 0 0 1 1.414 0l2.586 2.586a1 1 0 0 1 0 1.414l-12 12a1 1 0 0 1-.707.293H4a1 1 0 0 1-1-1v-3.586a1 1 0 0 1 .293-.707l12-12zM18.172 6.071L16 3.899l-9.9 9.9V16h2.201l9.9-9.9z"/></svg> </button> <button id="done-btn" class="icon-btn" title="Concluir Edição" style="display: none;"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z"/></svg> </button> </div>
     </div>
   </header>
 
-  <div class="container">
-    <div id="list"></div>
-    <div id="empty" class="empty" style="display:none;">Nenhum item encontrado.</div>
+  <div class="container"> <div id="list"></div> <div id="empty" class="empty" style="display:none;">Nenhum item encontrado.</div> </div>
+
+  <div class="footerbar" id="footerbar">
+    <div class="footer-content">
+      <div class="bulk-actions">
+        <button id="markOk"><span class="btn-text">Marcar como OK</span></button>
+        <button id="markWarn"><span class="btn-text">Marcar como Alerta</span></button>
+        <button id="markBad"><span class="btn-text">Marcar como Falta</span></button>
+      </div>
+      <button id="save" class="primary"><span class="btn-text">Salvar Alterações</span></button>
+    </div>
   </div>
 
-  <div class="footerbar">
-    <button id="markOk"><span class="btn-text">Marcar como OK</span></button>
-    <button id="markWarn"><span class="btn-text">Marcar como Alerta</span></button>
-    <button id="markBad"><span class="btn-text">Marcar como Falta</span></button>
-    <button id="save" class="primary"><span class="btn-text">Salvar Alterações</span></button>
-  </div>
-
-  <!-- NOVO: Modal de Edição -->
   <div class="modal-overlay" id="stock-modal-overlay">
     <div class="modal" id="stock-modal">
       <div class="modal-header" id="modal-item-name"></div>
-      <div class="modal-input-group">
-        <button id="decrement-stock">-</button>
-        <input type="number" id="stock-input" min="0" />
-        <button id="increment-stock">+</button>
-      </div>
-      <div class="modal-actions">
-        <button id="cancel-stock-update">Cancelar</button>
-        <button id="confirm-stock-update" class="primary">Confirmar</button>
-      </div>
+      <div class="modal-input-group"> <button id="decrement-stock">-</button> <input type="number" id="stock-input" min="0" /> <button id="increment-stock">+</button> </div>
+      <div class="modal-actions"> <button id="cancel-stock-update">Cancelar</button> <button id="confirm-stock-update" class="primary">Confirmar</button> </div>
     </div>
   </div>
 
@@ -167,7 +141,7 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNscmpxcXp6eHhweXdxdXBodmp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2OTYyMjksImV4cCI6MjA3MDI3MjIyOX0.JuzZMOC2X4NQUXeVdYBoQDY5pN-2O2igPK0zjNdcjcU';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let allItems = [], filtered = [], staged = new Map(), selected = new Set(), currentView = 'producao';
-    let activeModalItem = null; // Guarda o item sendo editado no modal
+    let activeModalItem = null;
 
     // ====== ELEMENTOS DO DOM ===============================================================
     const $body = document.body;
@@ -178,13 +152,12 @@
     const $doneBtn = document.getElementById('done-btn');
     const $selectAllBtn = document.getElementById('select-all-btn');
     const $selectionInfo = document.getElementById('selection-info');
+    const $footerbar = document.getElementById('footerbar');
     const $markOk = document.getElementById('markOk');
     const $markWarn = document.getElementById('markWarn');
     const $markBad = document.getElementById('markBad');
     const $save = document.getElementById('save');
     const $empty = document.getElementById('empty');
-    
-    // Elementos do Modal
     const $modalOverlay = document.getElementById('stock-modal-overlay');
     const $modalItemName = document.getElementById('modal-item-name');
     const $stockInput = document.getElementById('stock-input');
@@ -193,64 +166,44 @@
     const $cancelBtn = document.getElementById('cancel-stock-update');
     const $confirmBtn = document.getElementById('confirm-stock-update');
 
-    // ====== LÓGICA DO MODAL ================================================================
+    // ====== LÓGICA DE UI (MODAL, MODO DE SELEÇÃO, FOOTER) ===============================
     function openStockModal(item) {
       activeModalItem = item;
       $modalItemName.textContent = item.nome;
-      $stockInput.value = item.estoqueAtual || 0;
+      const effectiveStock = staged.get(item.id)?.estoqueAtual ?? item.estoqueAtual;
+      $stockInput.value = effectiveStock || 0;
       $modalOverlay.classList.add('visible');
-      $stockInput.focus();
-      $stockInput.select();
+      $stockInput.focus(); $stockInput.select();
+    }
+    function closeStockModal() { $modalOverlay.classList.remove('visible'); activeModalItem = null; }
+    
+    function setSelectionMode(isActive) {
+      $body.classList.toggle('selection-mode', isActive);
+      $editBtn.style.display = isActive ? 'none' : 'flex';
+      $doneBtn.style.display = isActive ? 'flex' : 'none';
+      if (!isActive) { selected.clear(); }
+      updateUI();
     }
 
-    function closeStockModal() {
-      activeModalItem = null;
-      $modalOverlay.classList.remove('visible');
+    function updateUI() {
+      // Atualiza contador de seleção
+      const count = selected.size;
+      $selectionInfo.textContent = count === 0 ? 'Selecione os itens' : `${count} ${count === 1 ? 'item selecionado' : 'itens selecionados'}`;
+      
+      // Atualiza visibilidade do footer
+      $footerbar.classList.toggle('visible', staged.size > 0);
+      $save.disabled = staged.size === 0;
     }
     
-    function confirmStockUpdate() {
-        if (!activeModalItem) return;
-        
-        const quantidadeAtual = parseInt($stockInput.value, 10);
-        const { id, parMin } = activeModalItem;
-        
-        // 1. Determinar novo status automaticamente
-        let novoStatus;
-        if (quantidadeAtual <= 0) {
-            novoStatus = 'FALTA';
-        } else if (quantidadeAtual <= parMin) {
-            novoStatus = 'ALERTA';
-        } else {
-            novoStatus = 'OK';
-        }
-        
-        // 2. Adicionar ao staged para salvar depois
-        staged.set(id, { estoqueAtual: quantidadeAtual, status: novoStatus });
-        
-        // 3. Atualizar o item na lista local para renderização imediata
-        const itemInAllItems = allItems.find(i => i.id === id);
-        if(itemInAllItems) {
-            itemInAllItems.estoqueAtual = quantidadeAtual;
-            itemInAllItems.status = novoStatus;
-        }
-
-        updateSaveButtonState();
-        closeStockModal();
-        render();
-    }
-
-    // ====== LÓGICA DO MODO DE SELEÇÃO =====================================================
-    function setSelectionMode(isActive) { /* ...sem alteração... */ }
-    function updateSelectionHeader() { /* ...sem alteração... */ }
-
-    // ====== RENDERIZAÇÃO E HELPERS ==========================================================
+    // ====== RENDERIZAÇÃO =================================================================
     const statusInfo = (s) => ({ 'OK': { text: 'OK', cls: 'ok' }, 'ALERTA': { text: 'Alerta', cls: 'warn' }, 'FALTA': { text: 'Falta', cls: 'bad' } }[s] || { text: s, cls: '' });
 
     function render() {
-      // 1. Filtrar
       const q = ($search.value || '').toLowerCase();
       filtered = allItems.filter(item => {
-        const inView = (currentView === 'compras') ? (staged.get(item.id)?.status || item.status) !== 'OK' : true;
+        const stagedItem = staged.get(item.id) || {};
+        const effectiveStatus = stagedItem.status || item.status;
+        const inView = (currentView === 'compras') ? effectiveStatus !== 'OK' : true;
         const matchesSearch = !q || item.nome.toLowerCase().includes(q) || (item.categoria || '').toLowerCase().includes(q);
         return inView && matchesSearch;
       });
@@ -259,16 +212,15 @@
       $empty.style.display = filtered.length === 0 ? 'block' : 'none';
       if (filtered.length === 0) return;
 
-      // 2. Agrupar por categoria
       const groupedItems = filtered.reduce((acc, item) => {
         const category = item.categoria || 'Outros';
         if (!acc[category]) { acc[category] = []; }
         acc[category].push(item);
         return acc;
       }, {});
-
-      // 3. Renderizar cada grupo
-      const sortedCategories = Object.keys(groupedItems).sort();
+      
+      const sortedCategories = Object.keys(groupedItems).sort((a, b) => a === 'Outros' ? 1 : b === 'Outros' ? -1 : a.localeCompare(b));
+      
       for (const category of sortedCategories) {
         const header = document.createElement('h3');
         header.className = 'category-header';
@@ -279,79 +231,77 @@
         grid.className = 'grid';
         
         for (const item of groupedItems[category]) {
-            // Pega o valor mais recente, seja do "staged" ou o original
-            const stagedItem = staged.get(item.id) || {};
-            const effectiveStatus = stagedItem.status || item.status;
-            const effectiveStock = stagedItem.estoqueAtual !== undefined ? stagedItem.estoqueAtual : item.estoqueAtual;
-
-            const s = statusInfo(effectiveStatus);
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.classList.toggle('selected', selected.has(item.id));
-            
-            card.innerHTML = `
-              <input type="checkbox" class="item-checkbox">
-              <div class="item-details">
-                <div class="name"></div>
-                <div class="meta">
-                    <span class="stock-info">${effectiveStock} / ${item.parMin || '–'} ${item.unidade || ''}</span>
-                    <span class="category-info">• ${item.categoria || 'Outros'}</span>
-                </div>
-                <div class="pill ${s.cls}">${s.text}</div>
-              </div>
-            `;
-            card.querySelector('.name').textContent = item.nome;
-            const checkbox = card.querySelector('.item-checkbox');
-            checkbox.checked = selected.has(item.id);
-
-            card.addEventListener('click', () => {
-                if ($body.classList.contains('selection-mode')) {
-                    // Lógica de seleção múltipla
-                    selected.has(item.id) ? selected.delete(item.id) : selected.add(item.id);
-                    render();
-                    updateSelectionHeader();
-                } else {
-                    // Abre o modal para edição de estoque
-                    openStockModal(item);
-                }
-            });
-            grid.appendChild(card);
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.dataset.itemId = item.id; // Adiciona ID para referência
+          grid.appendChild(card);
+          renderCardContent(card, item); // Delega a renderização do conteúdo do card
         }
         $list.appendChild(grid);
       }
     }
+
+    function renderCardContent(cardElement, item) {
+        const stagedItem = staged.get(item.id) || {};
+        const effectiveStatus = stagedItem.status || item.status;
+        const effectiveStock = stagedItem.estoqueAtual !== undefined ? stagedItem.estoqueAtual : item.estoqueAtual;
+
+        const s = statusInfo(effectiveStatus);
+        cardElement.classList.toggle('selected', selected.has(item.id));
+        
+        cardElement.innerHTML = `
+          <input type="checkbox" class="item-checkbox">
+          <div class="item-details">
+            <div class="name">${item.nome}</div>
+            <div class="meta">
+                <span class="stock-info">${effectiveStock} / ${item.parMin || '–'} ${item.unidade || ''}</span>
+            </div>
+            <div class="pill ${s.cls}">${s.text}</div>
+          </div>
+        `;
+        cardElement.querySelector('.item-checkbox').checked = selected.has(item.id);
+    }
     
     // ====== AÇÕES E BANCO DE DADOS ========================================================
+    function confirmStockUpdate() {
+        if (!activeModalItem) return;
+        const quantidadeAtual = parseInt($stockInput.value, 10);
+        const { id, parMin } = activeModalItem;
+        
+        let novoStatus = (quantidadeAtual <= 0) ? 'FALTA' : (quantidadeAtual <= parMin) ? 'ALERTA' : 'OK';
+        
+        staged.set(id, { ...staged.get(id), estoqueAtual: quantidadeAtual, status: novoStatus });
+        
+        const cardToUpdate = $list.querySelector(`.card[data-item-id='${id}']`);
+        if (cardToUpdate) renderCardContent(cardToUpdate, { ...activeModalItem, estoqueAtual: quantidadeAtual, status: novoStatus });
+
+        closeStockModal();
+        updateUI();
+    }
+
     function bulkStage(newStatus) {
       if(selected.size === 0) return;
       selected.forEach(id => {
-          const currentStaged = staged.get(id) || {};
-          staged.set(id, { ...currentStaged, status: newStatus });
+          staged.set(id, { ...staged.get(id), status: newStatus });
       });
       selected.clear();
-      updateSaveButtonState();
-      updateSelectionHeader();
       render();
+      updateUI();
     }
     
-    function updateSaveButtonState() { $save.disabled = staged.size === 0; }
-
     async function saveStaged() {
       if (staged.size === 0) return;
       $save.classList.add('saving'); $save.disabled = true;
-
       try {
-        const ops = Array.from(staged.entries()).map(([id, patch]) => 
-          supabase.from('itens').update(patch).eq('id', id)
-        );
+        const ops = Array.from(staged.entries()).map(([id, patch]) => supabase.from('itens').update(patch).eq('id', id));
         await Promise.all(ops);
         staged.clear();
-        setSelectionMode(false);
+        if ($body.classList.contains('selection-mode')) { setSelectionMode(false); }
         await fetchItems();
       } catch (e) {
         console.error('Erro ao salvar:', e); alert('Ocorreu um erro ao salvar as alterações.');
       } finally {
-        $save.classList.remove('saving'); updateSaveButtonState();
+        $save.classList.remove('saving'); updateUI();
       }
     }
 
@@ -363,17 +313,33 @@
     }
 
     // ====== EVENT LISTENERS ===============================================================
+    $list.addEventListener('click', (e) => {
+        const card = e.target.closest('.card');
+        if (!card) return;
+        
+        const itemId = parseInt(card.dataset.itemId, 10);
+        const item = allItems.find(i => i.id === itemId);
+        if(!item) return;
+
+        if ($body.classList.contains('selection-mode')) {
+            selected.has(itemId) ? selected.delete(itemId) : selected.add(itemId);
+            card.classList.toggle('selected', selected.has(itemId));
+            card.querySelector('.item-checkbox').checked = selected.has(itemId);
+            updateUI();
+        } else {
+            openStockModal(item);
+        }
+    });
+
     $editBtn.addEventListener('click', () => setSelectionMode(true));
     $doneBtn.addEventListener('click', () => setSelectionMode(false));
     $selectAllBtn.addEventListener('click', () => { /* ...sem alteração... */ });
-    $tabs.forEach(tab => tab.addEventListener('click', (e) => { /* ...sem alteração... */ }));
+    $tabs.forEach(tab => tab.addEventListener('click', (e) => { currentView = e.target.dataset.view; $tabs.forEach(t => t.classList.remove('active')); e.target.classList.add('active'); render(); }));
     $search.addEventListener('input', render);
     $markOk.addEventListener('click', () => bulkStage('OK'));
     $markWarn.addEventListener('click', () => bulkStage('ALERTA'));
     $markBad.addEventListener('click', () => bulkStage('FALTA'));
     $save.addEventListener('click', saveStaged);
-    
-    // Event Listeners do Modal
     $decrementBtn.addEventListener('click', () => { $stockInput.value = Math.max(0, parseInt($stockInput.value, 10) - 1); });
     $incrementBtn.addEventListener('click', () => { $stockInput.value = parseInt($stockInput.value, 10) + 1; });
     $cancelBtn.addEventListener('click', closeStockModal);
@@ -381,7 +347,7 @@
     $modalOverlay.addEventListener('click', (e) => { if (e.target === $modalOverlay) closeStockModal(); });
     
     // ====== INICIALIZAÇÃO =================================================================
-    updateSaveButtonState();
+    updateUI();
     fetchItems();
   </script>
 </body>
