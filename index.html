@@ -333,4 +333,34 @@
     
     $selectAllBtn.addEventListener('click', () => {
         const allFilteredIds = filtered.map(item => item.id);
-        const allSelected = a
+        const allSelected = allFilteredIds.every(id => selected.has(id));
+        
+        if (allSelected) {
+            selected.clear();
+        } else {
+            allFilteredIds.forEach(id => selected.add(id));
+        }
+        updateSelectionHeader();
+        render();
+    });
+
+    $tabs.forEach(tab => tab.addEventListener('click', (e) => {
+        currentView = e.target.dataset.view;
+        $tabs.forEach(t => t.classList.remove('active'));
+        e.target.classList.add('active');
+        render();
+    }));
+
+    $search.addEventListener('input', render);
+    
+    $markOk.addEventListener('click', () => bulkStage('OK'));
+    $markWarn.addEventListener('click', () => bulkStage('ALERTA'));
+    $markBad.addEventListener('click', () => bulkStage('FALTA'));
+    $save.addEventListener('click', saveStaged);
+    
+    // ====== INICIALIZAÇÃO =================================================================
+    updateSaveButtonState();
+    fetchItems();
+  </script>
+</body>
+</html>
