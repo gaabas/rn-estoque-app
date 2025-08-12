@@ -6,450 +6,331 @@
   <title>RIN – Checagem de Estoque</title>
   
   <style>
-    /* ===== Tema e Variáveis Globais ===== */
     :root{
       --bg:#f8fafc; --text:#0f172a; --muted:#475569;
       --card:#fff; --border:#e2e8f0; --shadow:0 6px 20px rgba(2,6,23,.06);
       --ok:#16a34a; --warn:#d97706; --bad:#dc2626;
-      --radius:14px; --focus-ring: 0 0 0 3px rgba(99, 102, 241, 0.4);
+      --radius:14px; --primary-color: #4f46e5;
     }
     *{box-sizing:border-box}
     body{
-      margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      margin:0; font-family:system-ui,-apple-system,sans-serif;
       background:var(--bg); color:var(--text);
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* ===== Header (com Auto-Hide) ===== */
+    /* ===== Header ===== */
     header{
       position:sticky; top:0; z-index:10;
-      background:rgba(255,255,255,0.85);
-      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      background:rgba(255,255,255,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
       border-bottom:1px solid var(--border); padding:10px 12px;
-      transition: transform 0.3s ease-in-out;
-    }
-    header.hidden {
-      transform: translateY(-100%);
     }
     .header-wrap{
-      display:grid; gap:8px; grid-template-columns:auto 1fr;
-      max-width:1200px; margin:0 auto; align-items: center;
+      display:flex; gap:12px; align-items: center;
+      max-width:1200px; margin:0 auto;
     }
-    .tabs{display:flex;gap:8px;flex-wrap:wrap}
-    .tab{
-      padding:8px 12px;border-radius:10px; background:#fff;border:1px solid var(--border);
-      cursor:pointer; transition:background .2s, border-color .2s;
+    .header-main-content {
+      flex-grow: 1; display:flex; flex-direction: column; gap: 8px;
     }
-    .tab.active{
-      background:#e0e7ff; border-color:#a5b4fc; color:#312e81; font-weight:600;
+    .header-actions {
+      flex-shrink: 0;
     }
-    .toolbar{
-      display:flex; flex-wrap:wrap; gap:8px;
-      align-items:center; justify-content: flex-end;
+    .tabs{display:flex;gap:8px;}
+    .tab{padding:8px 12px;border-radius:10px; background:#fff;border:1px solid var(--border);cursor:pointer;}
+    .tab.active{background:#eef2ff; border-color:#c7d2fe; color:var(--primary-color); font-weight:600;}
+    .toolbar{display:flex; gap:8px;}
+    .toolbar input, .toolbar select{background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:1rem;}
+    .icon-btn {
+      background:transparent; border:none; padding:8px; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      color: var(--muted);
     }
-    .toolbar input, .toolbar select, .toolbar button{
-      background:#fff;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px;
-      font-size:1rem; transition:border-color .2s, box-shadow .2s;
+    .icon-btn:hover { color: var(--text); background: #f1f5f9; border-radius: 50%;}
+    .icon-btn svg { width: 24px; height: 24px; }
+    
+    /* Controle de visibilidade dos elementos do header */
+    #selection-header-content { display: none; }
+    body.selection-mode .header-main-content,
+    body.selection-mode #edit-btn {
+        display: none;
     }
-    .toolbar button.icon-btn {
-        padding: 8px; line-height: 1; font-size: 1.2rem;
+    body.selection-mode #selection-header-content {
+        display: flex;
+        flex-grow: 1;
+        align-items: center;
+        justify-content: space-between;
     }
+    #selection-info { font-weight: 600; color: var(--primary-color); }
 
-    /* ===== Conteúdo Principal ===== */
-    .container{
-      padding:12px 12px 24px; max-width:1200px; margin:0 auto;
-    }
+    /* ===== Conteúdo e Cards ===== */
+    .container{padding:12px 12px 24px; max-width:1200px; margin:0 auto;}
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
     .card{
-      background:var(--card);border:1px solid var(--border);
+      background:var(--card);border:2px solid var(--border);
       border-radius:var(--radius);padding:12px;
-      display:flex;flex-direction:column;gap:8px; box-shadow:var(--shadow);
+      display:flex; gap:8px; box-shadow:var(--shadow); cursor:pointer;
+      transition: border-color .2s, box-shadow .2s;
     }
-    .card.selected {
-        border-color: #a5b4fc; box-shadow: 0 0 0 2px #a5b4fc;
-    }
+    .item-checkbox { display: none; margin-top: 4px; }
+    body.selection-mode .item-checkbox { display: block; }
+    body.selection-mode .card { cursor: pointer; }
+    .card.selected { border-color: var(--primary-color); }
+    .item-details { flex-grow: 1; display: flex; flex-direction: column; gap: 8px; }
     .name{font-weight:700}
-    .meta{color:var(--muted);font-size:12px;display:flex;gap:10px;flex-wrap:wrap}
-    .status{display:flex; justify-content: flex-end; margin-top: 8px;}
+    .meta{color:var(--muted);font-size:12px;}
     .pill{
-      padding:6px 12px;border-radius:999px;font-size:12px; border:1px solid transparent;
-      cursor:pointer; transition:all .2s;
+      padding:4px 10px;border-radius:999px;font-size:12px; font-weight: 500;
+      border:1px solid; align-self: flex-start;
     }
-    .pill.ok{background:rgba(22,163,74,.10);border-color:#86efac;color:#065f46}
-    .pill.warn{background:rgba(217,119,6,.12);border-color:#fed7aa;color:#7c2d12}
-    .pill.bad{background:rgba(220,38,38,.10);border-color:#fecaca;color:#7f1d1d}
+    .pill.ok{border-color:#86efac; color:#065f46; background:rgba(22,163,74,.10);}
+    .pill.warn{border-color:#fed7aa; color:#7c2d12; background:rgba(217,119,6,.12);}
+    .pill.bad{border-color:#fecaca; color:#7f1d1d; background:rgba(220,38,38,.10);}
 
-    /* ===== Rodapé (Condicional) ===== */
+    /* ===== Rodapé Condicional ===== */
     .footerbar{
       position:fixed; left:0; right:0; bottom:0; z-index: 20;
-      background:rgba(255,255,255,0.85);
-      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      background:rgba(255,255,255,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
       border-top:1px solid var(--border);
       padding:10px 12px calc(10px + env(safe-area-inset-bottom));
       box-shadow:0 -6px 20px rgba(2,6,23,.06);
       transition: transform 0.3s ease-in-out;
-      display:grid; grid-template-columns:1fr; gap:8px;
+      display:grid; grid-template-columns:1fr 1fr; gap:8px;
+      transform: translateY(100%); /* Começa escondido */
     }
-    .footerbar.hidden {
-        transform: translateY(100%);
+    body.selection-mode .footerbar {
+        transform: translateY(0);
     }
-    .footerbar button{ width: 100%; }
+    .footerbar button { grid-column: span 1; }
+    #save { grid-column: 1 / -1; }
 
-    /* ===== Outros Estilos ===== */
-    .badge{font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid var(--border);background:#f1f5f9;display:none}
+    /* Estilo do botão de salvar com spinner */
+    button {
+        cursor:pointer;border-radius:10px;border:1px solid var(--border);
+        background:#f8fafc;color:var(--text);padding:12px 10px;font-size:1rem;
+        position: relative; transition: background .2s;
+    }
+    button.primary{background:var(--primary-color);color:#fff; border-color:var(--primary-color); font-weight:600;}
+    button:disabled { background: #e2e8f0; color: var(--muted); cursor: not-allowed; }
+    button.saving .btn-text { visibility: hidden; }
+    button.saving::after {
+        content: ''; display: block;
+        position: absolute; top: 50%; left: 50%;
+        width: 20px; height: 20px;
+        margin-top: -10px; margin-left: -10px;
+        border-radius: 50%;
+        border: 2px solid rgba(255,255,255,0.5);
+        border-top-color: #fff;
+        animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    /* Outros */
     .empty{color:#64748b;font-style:italic;padding:24px 0; text-align:center;}
-    button{cursor:pointer;border-radius:10px;border:1px solid var(--border);background:#f8fafc;color:var(--text);padding:8px 10px;font-size:1rem;}
-    button.primary{background:#e0e7ff;border-color:#c7d2fe;color:#312e81; font-weight:600;}
-    form.add-item{display:grid;gap:8px;margin:8px 0 16px;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);}
-    form.add-item input{background:#fff;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:1rem;}
-
-    /* ===== Media Queries ===== */
-    @media (min-width: 641px) {
-        .header-wrap{ grid-template-columns: auto 1fr; }
-        .footerbar {
-            display:flex; flex-wrap: wrap; justify-content: flex-end;
-            grid-template-columns: unset; gap:8px;
-        }
-        .footerbar button { width: auto; }
-    }
-    @media (max-width:640px){
-      .header-wrap{grid-template-columns:1fr;}
-      .toolbar{flex-direction: column; align-items: stretch;}
-      .toolbar input, .toolbar select, .toolbar .admin {width: 100%;}
-      .toolbar .admin button {width: 100%;}
-      #search{order: -1;}
-      .grid{grid-template-columns:1fr}
-      form.add-item{grid-template-columns:1fr}
-    }
   </style>
 </head>
-<body>
+<body class=""> <!-- A classe 'selection-mode' será adicionada aqui via JS -->
+  
   <header>
     <div class="header-wrap">
-      <div class="tabs">
-        <button class="tab active" data-view="producao">Produção</button>
-        <button class="tab" data-view="compras">Compras</button>
-      </div>
-      <div class="toolbar">
-        <input id="search" type="search" placeholder="Buscar item…" />
-        <select id="filter">
-          <option value="TODOS">Todos</option>
-          <option value="OK">OK</option>
-          <option value="ALERTA">⚠ alerta</option>
-          <option value="FALTA">❌ falta</option>
-        </select>
-        <button id="exportCsv" class="ghost icon-btn" title="Exportar CSV (lista de compras)">📤</button>
-        <button id="refresh" class="ghost">Recarregar</button>
-        <div class="admin">
-          <span id="adminBadge" class="badge">Gestor</span>
-          <button id="adminBtn" class="ghost">Entrar como Gestor</button>
+      <!-- Conteúdo Padrão do Header -->
+      <div class="header-main-content" id="default-header-content">
+        <div class="tabs">
+          <button class="tab active" data-view="producao">Produção</button>
+          <button class="tab" data-view="compras">Compras</button>
         </div>
+        <div class="toolbar">
+          <input id="search" type="search" placeholder="Buscar item…" style="width:100%;" />
+        </div>
+      </div>
+      
+      <!-- Conteúdo do Header em Modo de Seleção -->
+      <div id="selection-header-content">
+        <span id="selection-info"></span>
+        <button id="select-all-btn" class="icon-btn" title="Selecionar Todos">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5V2a1 1 0 0 1 1-1h13a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-3v3a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h3zm1-3v11H4V8a1 1 0 0 1 .117-.458L4 7.5V6h11V2H8zm10.445 4.105L14.5 10.05l-1.945-1.945-1.414 1.414L14.5 12.879l4.359-4.359-1.414-1.414zM15 5h3v3h-3V5z"/></svg>
+        </button>
+      </div>
+      
+      <!-- Botões de Ação do Header (sempre visíveis) -->
+      <div class="header-actions">
+        <button id="edit-btn" class="icon-btn" title="Editar Itens">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M16.757 3.243a1 1 0 0 1 1.414 0l2.586 2.586a1 1 0 0 1 0 1.414l-12 12a1 1 0 0 1-.707.293H4a1 1 0 0 1-1-1v-3.586a1 1 0 0 1 .293-.707l12-12zM18.172 6.071L16 3.899l-9.9 9.9V16h2.201l9.9-9.9z"/></svg>
+        </button>
+        <button id="done-btn" class="icon-btn" title="Concluir Edição" style="display: none;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z"/></svg>
+        </button>
       </div>
     </div>
   </header>
 
   <div class="container">
-    <form class="add-item" id="addForm" style="display:none">
-      <input id="nome" placeholder="Nome do item" />
-      <input id="categoria" placeholder="Categoria" />
-      <input id="unidade" placeholder="Unidade (kg, un, pct…)" />
-      <input id="parMin" type="number" min="0" placeholder="Par mín." />
-      <button type="submit" class="primary">Adicionar</button>
-    </form>
     <div id="list" class="grid"></div>
     <div id="empty" class="empty" style="display:none;">Nenhum item encontrado.</div>
   </div>
 
-  <div class="footerbar hidden">
-    <button id="markOk">Marcar selecionados como OK</button>
-    <button id="markWarn">Marcar selecionados como ⚠ Alerta</button>
-    <button id="markBad">Marcar selecionados como ❌ Falta</button>
-    <button id="save" class="primary">Salvar alterações</button>
+  <div class="footerbar">
+    <button id="markOk"><span class="btn-text">Marcar como OK</span></button>
+    <button id="markWarn"><span class="btn-text">Marcar como Alerta</span></button>
+    <button id="markBad"><span class="btn-text">Marcar como Falta</span></button>
+    <button id="save" class="primary"><span class="btn-text">Salvar Alterações</span></button>
   </div>
 
   <script type="module">
-    // ================================== JAVASCRIPT COMPLETO E CORRIGIDO ==================================
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-    // ====== CONFIG ================================================================================
+    // ====== CONFIG E ESTADO INICIAL =========================================================
     const SUPABASE_URL = 'https://slrjqqzzxxpywquphvjz.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNscmpxcXp6eHhweXdxdXBodmp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2OTYyMjksImV4cCI6MjA3MDI3MjIyOX0.JuzZMOC2X4NQUXeVdYBoQDY5pN-2O2igPK0zjNdcjcU';
-    const GESTOR_PIN = '3461';
-
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let allItems = [], filtered = [], staged = new Map(), selected = new Set(), currentView = 'producao';
 
-    // ====== ESTADO ================================================================================
-    let currentView = 'producao', allItems = [], filtered = [], staged = new Map(), selected = new Set(), isGestor = !!localStorage.getItem('rin_is_gestor');
-    let lastScrollY = window.scrollY;
-
-    // ====== ELEMENTOS =============================================================================
-    const $header = document.querySelector('header');
-    const $footerbar = document.querySelector('.footerbar');
-    const $tabs = document.querySelectorAll('.tab');
-    const $search = document.getElementById('search');
-    const $filter = document.getElementById('filter');
-    const $refresh = document.getElementById('refresh');
+    // ====== ELEMENTOS DO DOM ===============================================================
+    const $body = document.body;
     const $list = document.getElementById('list');
+    const $search = document.getElementById('search');
     const $empty = document.getElementById('empty');
-    const $addForm = document.getElementById('addForm');
-    const $nome = document.getElementById('nome');
-    const $categoria = document.getElementById('categoria');
-    const $unidade = document.getElementById('unidade');
-    const $parMin = document.getElementById('parMin');
+    const $tabs = document.querySelectorAll('.tab');
+    
+    // Controles do Header
+    const $editBtn = document.getElementById('edit-btn');
+    const $doneBtn = document.getElementById('done-btn');
+    const $selectAllBtn = document.getElementById('select-all-btn');
+    const $selectionInfo = document.getElementById('selection-info');
+    
+    // Controles do Footer
     const $markOk = document.getElementById('markOk');
     const $markWarn = document.getElementById('markWarn');
     const $markBad = document.getElementById('markBad');
     const $save = document.getElementById('save');
-    const $exportCsv = document.getElementById('exportCsv');
-    const $adminBtn = document.getElementById('adminBtn');
-    const $adminBadge = document.getElementById('adminBadge');
 
-    // ====== HELPERS ===============================================================================
-    const statusToEmoji = (s) => ({
-        'OK': { label: 'OK', cls: 'ok', next: 'ALERTA' },
-        'ALERTA': { label: '⚠ Alerta', cls: 'warn', next: 'FALTA' },
-        'FALTA': { label: '❌ Falta', cls: 'bad', next: 'OK' }
-    }[s] || { label: s, cls: '', next: 'OK' });
-    
-    function normalize(str) { return (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+    // ====== LÓGICA DO MODO DE SELEÇÃO =====================================================
+    function setSelectionMode(isActive) {
+      $body.classList.toggle('selection-mode', isActive);
+      $editBtn.style.display = isActive ? 'none' : 'flex';
+      $doneBtn.style.display = isActive ? 'flex' : 'none';
 
-    function notify(msg) {
-        const n = document.createElement('div');
-        n.textContent = msg;
-        Object.assign(n.style, {
-            position: 'fixed', right: '16px', bottom: '80px', background: '#111827', color: '#f8fafc',
-            border: '1px solid #1f2937', borderRadius: '10px', padding: '8px 12px', zIndex: '9999',
-            boxShadow: '0 6px 20px rgba(0,0,0,.20)', opacity: '0', transform: 'translateY(10px)',
-            transition: 'opacity 0.3s, transform 0.3s'
-        });
-        document.body.appendChild(n);
-        requestAnimationFrame(() => { n.style.opacity = '1'; n.style.transform = 'translateY(0)'; });
-        setTimeout(() => {
-            n.style.opacity = '0'; n.style.transform = 'translateY(10px)';
-            setTimeout(() => n.remove(), 300);
-        }, 2000);
-    }
-
-    function updateFooterVisibility() {
-        const shouldBeVisible = staged.size > 0 || selected.size > 0;
-        $footerbar.classList.toggle('hidden', !shouldBeVisible);
-    }
-    
-    function updateSaveButton() {
-        const n = staged.size;
-        $save.textContent = n ? `Salvar alterações (${n})` : 'Salvar alterações';
-        $save.disabled = n === 0;
-        updateFooterVisibility();
-    }
-    
-    function updateGestorUI() {
-        if ($addForm) $addForm.style.display = isGestor ? 'grid' : 'none';
-        if ($adminBadge) $adminBadge.style.display = isGestor ? 'inline-block' : 'none';
-        if ($adminBtn) $adminBtn.textContent = isGestor ? 'Sair do modo Gestor' : 'Entrar como Gestor';
-    }
-
-    function applyFilters() {
-      const q = normalize($search?.value);
-      const f = $filter?.value || 'TODOS';
-      let rows = allItems.slice();
-      if (currentView === 'compras') {
-        rows = rows.filter(r => (staged.get(r.id)?.status || r.status) !== 'OK');
+      if (!isActive) {
+        selected.clear();
       }
-      if (f !== 'TODOS') {
-        rows = rows.filter(r => (staged.get(r.id)?.status || r.status) === f);
-      }
-      if (q) {
-        rows = rows.filter(r =>
-          normalize(r.nome).includes(q) ||
-          normalize(r.categoria).includes(q) ||
-          normalize(r.unidade).includes(q)
-        );
-      }
-      filtered = rows;
+      updateSelectionHeader();
+      render();
     }
     
-    function toCsv(rows) {
-      const header = ['nome','categoria','unidade','parMin','status'];
-      const esc = (v) => {
-        const s = v == null ? '' : String(v);
-        return /[",;\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
-      };
-      const lines = [header.join(';')];
-      for (const r of rows) {
-        const status = staged.get(r.id)?.status || r.status;
-        lines.push([r.nome, r.categoria || '', r.unidade || '', r.parMin ?? '', status].map(esc).join(';'));
-      }
-      return lines.join('\n');
-    }
-
-    function download(filename, text) {
-      const blob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = filename; a.style.display = 'none';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-    
-    // ====== RENDER =================================================================================
-    function render() {
-        applyFilters();
-        $list.innerHTML = '';
-        if (filtered.length === 0) { $empty.style.display = 'block'; return; }
-        $empty.style.display = 'none';
-
-        for (const item of filtered) {
-            const effectiveStatus = staged.get(item.id)?.status || item.status;
-            const s = statusToEmoji(effectiveStatus);
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.classList.toggle('selected', selected.has(item.id));
-
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.checked = selected.has(item.id);
-            checkbox.onchange = (e) => {
-                e.target.checked ? selected.add(item.id) : selected.delete(item.id);
-                card.classList.toggle('selected', e.target.checked);
-                updateFooterVisibility();
-            };
-
-            const pill = document.createElement('span');
-            pill.className = `pill ${s.cls}`;
-            pill.textContent = s.label;
-            pill.onclick = () => stageStatus(item.id, s.next);
-            
-            card.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <div class="name">${item.nome}</div>
-                </div>
-                <div class="meta">
-                  <span>${item.categoria||'–'}</span> • <span>${item.unidade||'–'}</span> • <span>par mín.: ${item.parMin??'–'}</span>
-                </div>
-                <div class="status"></div>
-            `;
-            card.querySelector('.status').appendChild(pill);
-            card.querySelector('.name').after(checkbox);
-            $list.appendChild(card);
-        }
-    }
-
-    // ====== AÇÕES ==================================================================================
-    function stageStatus(id, status) {
-        staged.set(id, { ...staged.get(id), status });
-        updateSaveButton();
-        render();
-    }
-
-    function bulkStage(status) {
-        if (selected.size === 0) { notify('Nenhum item selecionado!'); return; }
-        for (const id of selected) stageStatus(id, status);
-    }
-    
-    function exportCsv() {
-        let rows;
-        if (currentView === 'compras') {
-            rows = filtered.slice();
+    function updateSelectionHeader() {
+        const count = selected.size;
+        if (count === 0) {
+            $selectionInfo.textContent = 'Selecione os itens';
         } else {
-            rows = (allItems).filter(r => (staged.get(r.id)?.status || r.status) !== 'OK');
+            $selectionInfo.textContent = `${count} ${count === 1 ? 'item selecionado' : 'itens selecionados'}`;
         }
-        if (!rows.length) { notify('Nada para exportar'); return; }
-        const csv = toCsv(rows);
-        const stamp = new Date().toISOString().slice(0,10);
-        download(`lista-compras-${stamp}.csv`, csv);
-        notify('CSV gerado');
     }
 
-    // ====== SUPABASE - CRUD =========================================================================
-    async function fetchItems() {
-        const { data, error } = await supabase.from('itens').select('*').order('nome', { ascending: true });
-        if (error) { console.error('Erro ao carregar itens:', error); notify('Erro ao carregar itens.'); return; }
-        allItems = data || [];
-        render();
-    }
+    // ====== RENDERIZAÇÃO E HELPERS ==========================================================
+    const statusInfo = (s) => ({
+        'OK': { text: 'OK', cls: 'ok' },
+        'ALERTA': { text: 'Alerta', cls: 'warn' },
+        'FALTA': { text: 'Falta', cls: 'bad' }
+    }[s] || { text: s, cls: '' });
 
-    async function addItem(payload) {
-        const { data, error } = await supabase.from('itens').insert([payload]).select().single();
-        if (error) { console.error('Erro ao adicionar item:', error); alert('Não consegui adicionar o item.'); return; }
-        allItems.push(data);
-        allItems.sort((a,b)=> a.nome.localeCompare(b.nome));
-        render();
-        notify('Item adicionado!');
+    function render() {
+      // Filtros (não precisam mudar)
+      const q = ($search.value || '').toLowerCase();
+      filtered = allItems.filter(item => {
+          const inView = (currentView === 'compras') ? item.status !== 'OK' : true;
+          const matchesSearch = !q || item.nome.toLowerCase().includes(q);
+          return inView && matchesSearch;
+      });
+
+      $list.innerHTML = '';
+      $empty.style.display = filtered.length === 0 ? 'block' : 'none';
+
+      for (const item of filtered) {
+        const effectiveStatus = staged.get(item.id)?.status || item.status;
+        const s = statusInfo(effectiveStatus);
+        
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.classList.toggle('selected', selected.has(item.id));
+        
+        card.innerHTML = `
+          <input type="checkbox" class="item-checkbox">
+          <div class="item-details">
+            <div class="name"></div>
+            <div class="meta"></div>
+            <div class="pill ${s.cls}">${s.text}</div>
+          </div>
+        `;
+
+        card.querySelector('.name').textContent = item.nome;
+        card.querySelector('.meta').textContent = `${item.categoria || '–'} • ${item.unidade || '–'} • par mín.: ${item.parMin ?? '–'}`;
+        
+        const checkbox = card.querySelector('.item-checkbox');
+        checkbox.checked = selected.has(item.id);
+
+        const toggleSelection = () => {
+            selected.has(item.id) ? selected.delete(item.id) : selected.add(item.id);
+            checkbox.checked = selected.has(item.id);
+            card.classList.toggle('selected', selected.has(item.id));
+            updateSelectionHeader();
+        };
+
+        card.addEventListener('click', (e) => {
+            if ($body.classList.contains('selection-mode')) {
+                toggleSelection();
+            }
+        });
+        
+        $list.appendChild(card);
+      }
+    }
+    
+    // ====== AÇÕES E BANCO DE DADOS ========================================================
+    function bulkStage(newStatus) {
+        if(selected.size === 0) return;
+        selected.forEach(id => staged.set(id, { status: newStatus }));
+        render(); // Re-renderiza para mostrar as pílulas atualizadas
+        updateSaveButtonState();
+    }
+    
+    function updateSaveButtonState() {
+        $save.disabled = staged.size === 0;
     }
 
     async function saveStaged() {
-        if (staged.size === 0) return;
-        $save.disabled = true; $save.textContent = 'Salvando…';
-        try {
-            const ops = Array.from(staged.entries()).map(([id, patch]) => supabase.from('itens').update(patch).eq('id', id));
-            await Promise.all(ops);
-            await fetchItems();
-            staged.clear();
-            selected.clear();
-            updateFooterVisibility();
-            notify('Alterações salvas');
-        } catch (e) {
-            console.error('Erro inesperado no save:', e); alert('Erro inesperado ao salvar.');
-        } finally {
-            updateSaveButton();
-        }
+      if (staged.size === 0) return;
+      
+      $save.classList.add('saving');
+      $save.disabled = true;
+
+      try {
+        const ops = Array.from(staged.entries()).map(([id, patch]) => 
+          supabase.from('itens').update(patch).eq('id', id)
+        );
+        await Promise.all(ops);
+        
+        staged.clear();
+        setSelectionMode(false); // Sai do modo de seleção e limpa `selected`
+        await fetchItems(); // Busca dados atualizados
+      } catch (e) {
+        console.error('Erro ao salvar:', e);
+        alert('Ocorreu um erro ao salvar as alterações.');
+      } finally {
+        $save.classList.remove('saving');
+        updateSaveButtonState();
+      }
     }
+
+    async function fetchItems() {
+      const { data, error } = await supabase.from('itens').select('*').order('nome');
+      if (error) { console.error(error); return; }
+      allItems = data || [];
+      render();
+    }
+
+    // ====== EVENT LISTENERS ===============================================================
+    $editBtn.addEventListener('click', () => setSelectionMode(true));
+    $doneBtn.addEventListener('click', () => setSelectionMode(false));
     
-    // ====== EVENTOS ===============================================================================
-    window.addEventListener('scroll', () => {
-        if (window.innerWidth > 640) return;
-        const currentScrollY = window.scrollY;
-        $header.classList.toggle('hidden', currentScrollY > lastScrollY && currentScrollY > 60);
-        lastScrollY = currentScrollY;
-    });
-
-    $tabs.forEach(tab => tab.addEventListener('click', () => {
-        $tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        currentView = tab.dataset.view;
-        render();
-    }));
-
-    $search.addEventListener('input', render);
-    $filter.addEventListener('change', render);
-    $refresh.addEventListener('click', fetchItems);
-    $markOk.addEventListener('click', () => bulkStage('OK'));
-    $markWarn.addEventListener('click', () => bulkStage('ALERTA'));
-    $markBad.addEventListener('click', () => bulkStage('FALTA'));
-    $save.addEventListener('click', saveStaged);
-    $exportCsv.addEventListener('click', exportCsv);
-
-    $addForm.addEventListener('submit', async (e) => {
-        e.preventDefault(); if (!isGestor) return;
-        const payload = {
-            nome: ($nome.value || '').trim(), categoria: ($categoria.value || '').trim() || null,
-            unidade: ($unidade.value || '').trim() || null, parMin: $parMin.value ? Number($parMin.value) : null,
-            status: 'OK'
-        };
-        if (!payload.nome) { notify('O nome do item é obrigatório!'); $nome.focus(); return; }
-        await addItem(payload);
-        $addForm.reset(); $nome.focus();
-    });
-
-    $adminBtn.addEventListener('click', () => {
-        if (isGestor) {
-            isGestor = false; localStorage.removeItem('rin_is_gestor');
-            updateGestorUI(); notify('Saiu do modo Gestor');
-            return;
-        }
-        const pin = prompt('PIN do Gestor:');
-        if (pin === GESTOR_PIN) {
-            isGestor = true; localStorage.setItem('rin_is_gestor', '1');
-            updateGestorUI(); notify('Modo Gestor ativado');
-        } else if (pin !== null) { alert('PIN incorreto.'); }
-    });
-
-    // ====== BOOT ==================================================================================
-    updateGestorUI();
-    updateSaveButton();
-    fetchItems();
-  </script>
-</body>
-</html>
+    $selectAllBtn.addEventListener('click', () => {
+        const allFilteredIds = filtered.map(item => item.id);
+        const allSelected = a
