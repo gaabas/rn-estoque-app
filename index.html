@@ -79,8 +79,9 @@
     #stock-input { flex-grow: 1; text-align: center; font-size: 1.8rem; font-weight: bold; padding: 10px; border: 1px solid var(--border); border-radius: 10px; width: 100%; }
     #stock-input::-webkit-outer-spin-button, #stock-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     #stock-input[type=number] { -moz-appearance: textfield; }
-    .modal-actions { display: flex; gap: 10px; }
+    .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .modal-actions button { flex-grow: 1; padding: 12px; }
+    #modal-list-action-btn { grid-column: 1 / -1; margin-top: 10px; } /* Botão novo */
 
     /* ===== Outros Estilos ===== */
     button { cursor:pointer;border-radius:10px;border:1px solid var(--border); background:#f8fafc;color:var(--text);padding:12px 10px;font-size:1rem; position: relative; transition: background .2s; }
@@ -100,11 +101,11 @@
         <div class="tabs"> <button class="tab active" data-view="producao">Produção</button> <button class="tab" data-view="compras">Compras</button> </div>
         <div class="toolbar"> <input id="search" type="search" placeholder="Buscar item…"/> </div>
       </div>
-      <div id="selection-header-content"> <span id="selection-info"></span> </div>
+      <div id="selection-header-content"> <span id="selection-info"></span></div>
       <div class="header-actions">
-          <button id="shopping-mode-btn" class="icon-btn" title="Marcar itens para comprar">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11 2a1 1 0 1 0 0 2h10a1 1 0 1 0 0-2H11ZM3 2a1 1 0 0 0-1 1v18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H3Zm1 2h16v16H4V4Zm8 3a1 1 0 0 1 1 1v3h3a1 1 0 1 1 0 2h-3v3a1 1 0 1 1-2 0v-3H8a1 1 0 1 1 0-2h3V8a1 1 0 0 1 1-1Z"/></svg>
-          </button>
+        <button id="shopping-mode-btn" class="icon-btn" title="Marcar itens para comprar">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11 2a1 1 0 1 0 0 2h10a1 1 0 1 0 0-2H11ZM3 2a1 1 0 0 0-1 1v18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H3Zm1 2h16v16H4V4Zm8 3a1 1 0 0 1 1 1v3h3a1 1 0 1 1 0 2h-3v3a1 1 0 1 1-2 0v-3H8a1 1 0 1 1 0-2h3V8a1 1 0 0 1 1-1Z"/></svg>
+        </button>
         <button id="done-btn" class="icon-btn" title="Concluir" style="display: none;">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z"/></svg>
         </button>
@@ -117,7 +118,7 @@
   <div class="footerbar" id="footerbar">
     <div class="footer-content">
       <button id="mark-to-buy-btn" class="primary"><span class="btn-text">Adicionar à Lista de Compras</span></button>
-      <button id="save" class="primary"><span class="btn-text">Salvar Alterações</span></button>
+      <div id="save-btn-wrapper"> <button id="save" class="primary"><span class="btn-text">Salvar Alterações</span></button> </div>
     </div>
   </div>
 
@@ -125,7 +126,11 @@
     <div class="modal" id="stock-modal">
       <div class="modal-header" id="modal-item-name"></div>
       <div class="modal-input-group"> <button id="decrement-stock">-</button> <input type="number" id="stock-input" min="0" /> <button id="increment-stock">+</button> </div>
-      <div class="modal-actions"> <button id="cancel-stock-update">Cancelar</button> <button id="confirm-stock-update" class="primary">Confirmar</button> </div>
+      <div class="modal-actions">
+        <button id="cancel-stock-update">Cancelar</button>
+        <button id="confirm-stock-update" class="primary">Confirmar</button>
+        <button id="modal-list-action-btn"></button> <!-- Botão novo -->
+      </div>
     </div>
   </div>
 
@@ -159,13 +164,27 @@
     const $incrementBtn = document.getElementById('increment-stock');
     const $cancelBtn = document.getElementById('cancel-stock-update');
     const $confirmBtn = document.getElementById('confirm-stock-update');
+    const $modalListActionBtn = document.getElementById('modal-list-action-btn');
 
     // ====== LÓGICA DE UI ===================================================================
     function openStockModal(item) {
       activeModalItem = item;
       $modalItemName.textContent = item.nome;
-      const effectiveStock = staged.get(item.id)?.estoqueAtual ?? item.estoqueAtual;
+      
+      const stagedItem = staged.get(item.id) || {};
+      const effectiveStock = stagedItem.estoqueAtual ?? item.estoqueAtual;
+      const effectiveStatus = stagedItem.status || item.status;
+
       $stockInput.value = effectiveStock || 0;
+      
+      if (effectiveStatus === 'COMPRAR') {
+        $modalListActionBtn.textContent = 'Remover da Lista';
+        $modalListActionBtn.classList.remove('primary');
+      } else {
+        $modalListActionBtn.textContent = 'Adicionar à Lista';
+        $modalListActionBtn.classList.add('primary');
+      }
+
       $modalOverlay.classList.add('visible');
       $body.classList.add('modal-open');
       $stockInput.focus(); $stockInput.select();
@@ -227,19 +246,13 @@
         const header = document.createElement('h3');
         header.className = 'category-header';
         header.dataset.category = category;
-        
         const categoryItems = groupedItems[category];
         const allInCategorySelected = categoryItems.every(item => selected.has(item.id));
-        
-        header.innerHTML = `
-            <span>${category}</span>
-            <input type="checkbox" class="category-checkbox" ${allInCategorySelected ? 'checked' : ''}>
-        `;
+        header.innerHTML = `<span>${category}</span><input type="checkbox" class="category-checkbox" ${allInCategorySelected ? 'checked' : ''}>`;
         $list.appendChild(header);
 
         const grid = document.createElement('div');
         grid.className = 'grid';
-        
         for (const item of categoryItems) {
           const card = document.createElement('div');
           card.className = 'card';
@@ -255,10 +268,8 @@
         const stagedItem = staged.get(item.id) || {};
         const effectiveStatus = stagedItem.status || item.status;
         const effectiveStock = stagedItem.estoqueAtual !== undefined ? stagedItem.estoqueAtual : item.estoqueAtual;
-
         const s = statusInfo(effectiveStatus);
         cardElement.classList.toggle('selected', selected.has(item.id));
-        
         cardElement.innerHTML = `
           <input type="checkbox" class="item-checkbox" ${selected.has(item.id) ? 'checked' : ''}>
           <div class="item-details">
@@ -273,12 +284,33 @@
     }
     
     // ====== AÇÕES E BANCO DE DADOS ========================================================
+    function calculateStatus(estoque, parMin) {
+        return (estoque <= 0) ? 'FALTA' : (estoque <= parMin) ? 'ALERTA' : 'OK';
+    }
+
     function confirmStockUpdate() {
         if (!activeModalItem) return;
         const quantidadeAtual = parseInt($stockInput.value, 10);
-        const { id, parMin } = activeModalItem;
-        let novoStatus = (quantidadeAtual <= 0) ? 'FALTA' : (quantidadeAtual <= parMin) ? 'ALERTA' : 'OK';
-        staged.set(id, { ...staged.get(id), estoqueAtual: quantidadeAtual, status: novoStatus });
+        const novoStatus = calculateStatus(quantidadeAtual, activeModalItem.parMin);
+        staged.set(activeModalItem.id, { ...staged.get(activeModalItem.id), estoqueAtual: quantidadeAtual, status: novoStatus });
+        closeStockModal();
+        render();
+        updateUI();
+    }
+    
+    function toggleListItemInModal() {
+        if (!activeModalItem) return;
+        const { id, estoqueAtual, parMin } = activeModalItem;
+        const stagedItem = staged.get(id) || {};
+        const effectiveStatus = stagedItem.status || activeModalItem.status;
+
+        let novoStatus;
+        if (effectiveStatus === 'COMPRAR') {
+            novoStatus = calculateStatus(stagedItem.estoqueAtual ?? estoqueAtual, parMin); // Reverte para o status automático
+        } else {
+            novoStatus = 'COMPRAR';
+        }
+        staged.set(id, { ...stagedItem, status: novoStatus });
         closeStockModal();
         render();
         updateUI();
@@ -286,13 +318,11 @@
 
     function markToBuy() {
       if(selected.size === 0) return;
-      selected.forEach(id => {
-          staged.set(id, { ...staged.get(id), status: 'COMPRAR' });
-      });
+      selected.forEach(id => { staged.set(id, { ...staged.get(id), status: 'COMPRAR' }); });
       selected.clear();
       render();
       updateUI();
-      setSelectionMode(false); // Sai do modo de seleção
+      setSelectionMode(false);
     }
     
     async function saveStaged() {
@@ -337,7 +367,6 @@
             const itemId = parseInt(card.dataset.itemId, 10);
             const item = allItems.find(i => i.id === itemId);
             if(!item) return;
-
             if ($body.classList.contains('selection-mode')) {
                 selected.has(itemId) ? selected.delete(itemId) : selected.add(itemId);
                 render();
@@ -358,6 +387,7 @@
     $incrementBtn.addEventListener('click', () => { $stockInput.value = parseInt($stockInput.value, 10) + 1; });
     $cancelBtn.addEventListener('click', closeStockModal);
     $confirmBtn.addEventListener('click', confirmStockUpdate);
+    $modalListActionBtn.addEventListener('click', toggleListItemInModal);
     $modalOverlay.addEventListener('click', (e) => { if (e.target === $modalOverlay) closeStockModal(); });
     
     // ====== INICIALIZAÇÃO =================================================================
@@ -366,4 +396,3 @@
   </script>
 </body>
 </html>
-
