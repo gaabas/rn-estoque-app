@@ -34,19 +34,20 @@
     .icon-btn:hover { color: var(--text); background: #f1f5f9; border-radius: 50%;}
     .icon-btn svg { width: 24px; height: 24px; }
     #selection-header-content { display: none; }
-    body.selection-mode .header-main-content, body.selection-mode #edit-btn { display: none; }
+    body.selection-mode .header-main-content, body.selection-mode #shopping-mode-btn { display: none; }
     body.selection-mode #selection-header-content { display: flex; flex-grow: 1; align-items: center; justify-content: space-between; }
     #selection-info { font-weight: 600; color: var(--primary-color); }
 
     /* ===== Conteúdo e Cards ===== */
     .container{ padding:12px 12px 120px; max-width:1200px; margin:0 auto; }
-    .category-header { font-size: 1.1rem; font-weight: 600; color: var(--text); margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .category-header { display: flex; align-items: center; justify-content: space-between; font-size: 1.1rem; font-weight: 600; color: var(--text); margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
     .category-header:first-of-type { margin-top: 0; }
+    .category-checkbox { display: none; }
+    body.selection-mode .category-checkbox { display: inline-block; }
     .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px; }
     .card{ background:var(--card);border:2px solid var(--border); border-radius:var(--radius);padding:12px; display:flex; gap:8px; box-shadow:var(--shadow); cursor:pointer; transition: border-color .2s, box-shadow .2s; }
     .item-checkbox { display: none; margin-top: 4px; }
     body.selection-mode .item-checkbox { display: block; }
-    body.selection-mode .card { cursor: pointer; }
     .card.selected { border-color: var(--primary-color); }
     .item-details { flex-grow: 1; display: flex; flex-direction: column; gap: 8px; }
     .name{ font-weight:700 }
@@ -59,33 +60,18 @@
     .pill.buy{ border-color:#c7d2fe; color:var(--primary-color); background:#eef2ff; }
 
     /* ===== Rodapé ===== */
-    .footerbar{
-      position:fixed; left:0; right:0; bottom:0; z-index: 20;
-      background:rgba(255,255,255,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-      border-top:1px solid var(--border); padding:10px 12px calc(10px + env(safe-area-inset-bottom));
-      box-shadow:0 -6px 20px rgba(2,6,23,.06); transition: transform 0.3s ease-in-out;
-      transform: translateY(100%);
-    }
+    .footerbar{ position:fixed; left:0; right:0; bottom:0; z-index: 20; background:rgba(255,255,255,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-top:1px solid var(--border); padding:10px 12px calc(10px + env(safe-area-inset-bottom)); box-shadow:0 -6px 20px rgba(2,6,23,.06); transition: transform 0.3s ease-in-out; transform: translateY(100%); }
     .footerbar.visible { transform: translateY(0); }
     .footer-content { display: grid; gap: 8px; }
     #mark-to-buy-btn { display: none; }
     body.selection-mode #mark-to-buy-btn { display: block; }
+    #save-btn-wrapper { display: block; }
+    body.selection-mode #save-btn-wrapper { display: none; }
 
     /* ===== Modal de Edição de Estoque ===== */
-    .modal-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.4); z-index: 99;
-      display: flex; align-items: center; justify-content: center;
-      padding: 1rem;
-      opacity: 0; transition: opacity .2s; pointer-events: none;
-    }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 99; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; transition: opacity .2s; pointer-events: none; }
     .modal-overlay.visible { opacity: 1; pointer-events: all; }
-    .modal {
-      background: var(--bg); padding: 24px; border-radius: var(--radius);
-      width: 100%; max-width: 380px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      transform: scale(0.95); transition: transform .2s;
-    }
+    .modal { background: var(--bg); padding: 24px; border-radius: var(--radius); width: 100%; max-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: scale(0.95); transition: transform .2s; }
     .modal-overlay.visible .modal { transform: scale(1); }
     .modal-header { font-size: 1.2rem; font-weight: 600; margin-bottom: 16px; }
     .modal-input-group { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
@@ -114,8 +100,15 @@
         <div class="tabs"> <button class="tab active" data-view="producao">Produção</button> <button class="tab" data-view="compras">Compras</button> </div>
         <div class="toolbar"> <input id="search" type="search" placeholder="Buscar item…"/> </div>
       </div>
-      <div id="selection-header-content"> <span id="selection-info"></span> <button id="select-all-btn" class="icon-btn" title="Selecionar Todos"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5V2a1 1 0 0 1 1-1h13a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-3v3a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h3zm1-3v11H4V8a1 1 0 0 1 .117-.458L4 7.5V6h11V2H8zm10.445 4.105L14.5 10.05l-1.945-1.945-1.414 1.414L14.5 12.879l4.359-4.359-1.414-1.414zM15 5h3v3h-3V5z"/></svg> </button> </div>
-      <div class="header-actions"> <button id="edit-btn" class="icon-btn" title="Marcar para Comprar"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M16.757 3.243a1 1 0 0 1 1.414 0l2.586 2.586a1 1 0 0 1 0 1.414l-12 12a1 1 0 0 1-.707.293H4a1 1 0 0 1-1-1v-3.586a1 1 0 0 1 .293-.707l12-12zM18.172 6.071L16 3.899l-9.9 9.9V16h2.201l9.9-9.9z"/></svg> </button> <button id="done-btn" class="icon-btn" title="Concluir" style="display: none;"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z"/></svg> </button> </div>
+      <div id="selection-header-content"> <span id="selection-info"></span> </div>
+      <div class="header-actions">
+        <button id="shopping-mode-btn" class="icon-btn" title="Marcar itens para comprar">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4.99989 2C4.4476 2 3.99989 2.44772 3.99989 3V5H19.9999V3C19.9999 2.44772 19.5522 2 18.9999 2H4.99989ZM3.99989 7V19C3.99989 20.1046 4.89531 21 5.99989 21H17.9999C19.1045 21 19.9999 20.1046 19.9999 19V7H3.99989ZM11.9999 15.5C12.5522 15.5 12.9999 15.0523 12.9999 14.5V11.5C12.9999 10.9477 12.5522 10.5 11.9999 10.5C11.4476 10.5 10.9999 10.9477 10.9999 11.5V14.5C10.9999 15.0523 11.4476 15.5 11.9999 15.5Z"/></svg>
+        </button>
+        <button id="done-btn" class="icon-btn" title="Concluir" style="display: none;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z"/></svg>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -152,9 +145,8 @@
     const $list = document.getElementById('list');
     const $search = document.getElementById('search');
     const $tabs = document.querySelectorAll('.tab');
-    const $editBtn = document.getElementById('edit-btn');
+    const $shoppingModeBtn = document.getElementById('shopping-mode-btn');
     const $doneBtn = document.getElementById('done-btn');
-    const $selectAllBtn = document.getElementById('select-all-btn');
     const $selectionInfo = document.getElementById('selection-info');
     const $footerbar = document.getElementById('footerbar');
     const $markToBuyBtn = document.getElementById('mark-to-buy-btn');
@@ -182,7 +174,7 @@
     
     function setSelectionMode(isActive) {
       $body.classList.toggle('selection-mode', isActive);
-      $editBtn.style.display = isActive ? 'none' : 'flex';
+      $shoppingModeBtn.style.display = isActive ? 'none' : 'flex';
       $doneBtn.style.display = isActive ? 'flex' : 'none';
       if (!isActive) { selected.clear(); }
       updateUI();
@@ -234,13 +226,21 @@
       for (const category of sortedCategories) {
         const header = document.createElement('h3');
         header.className = 'category-header';
-        header.textContent = category;
+        header.dataset.category = category;
+        
+        const categoryItems = groupedItems[category];
+        const allInCategorySelected = categoryItems.every(item => selected.has(item.id));
+        
+        header.innerHTML = `
+            <span>${category}</span>
+            <input type="checkbox" class="category-checkbox" ${allInCategorySelected ? 'checked' : ''}>
+        `;
         $list.appendChild(header);
 
         const grid = document.createElement('div');
         grid.className = 'grid';
         
-        for (const item of groupedItems[category]) {
+        for (const item of categoryItems) {
           const card = document.createElement('div');
           card.className = 'card';
           card.dataset.itemId = item.id;
@@ -277,15 +277,10 @@
         if (!activeModalItem) return;
         const quantidadeAtual = parseInt($stockInput.value, 10);
         const { id, parMin } = activeModalItem;
-        
         let novoStatus = (quantidadeAtual <= 0) ? 'FALTA' : (quantidadeAtual <= parMin) ? 'ALERTA' : 'OK';
-        
         staged.set(id, { ...staged.get(id), estoqueAtual: quantidadeAtual, status: novoStatus });
-        
-        const cardToUpdate = $list.querySelector(`.card[data-item-id='${id}']`);
-        if (cardToUpdate) renderCardContent(cardToUpdate, { ...activeModalItem, estoqueAtual: quantidadeAtual, status: novoStatus });
-
         closeStockModal();
+        render();
         updateUI();
     }
 
@@ -297,11 +292,7 @@
       selected.clear();
       render();
       updateUI();
-      // Mostra o botão de salvar explicitamente, já que agora há mudanças
-      $footerbar.classList.add('visible');
-      $save.style.display = 'block';
-      $markToBuyBtn.style.display = 'none';
-      setSelectionMode(false); // Sai do modo de seleção para focar em salvar
+      setSelectionMode(false); // Sai do modo de seleção
     }
     
     async function saveStaged() {
@@ -330,26 +321,35 @@
     // ====== EVENT LISTENERS ===============================================================
     $list.addEventListener('click', (e) => {
         const card = e.target.closest('.card');
-        if (!card) return;
-        
-        const itemId = parseInt(card.dataset.itemId, 10);
-        const item = allItems.find(i => i.id === itemId);
-        if(!item) return;
+        const categoryHeader = e.target.closest('.category-header');
 
-        if ($body.classList.contains('selection-mode')) {
-            selected.has(itemId) ? selected.delete(itemId) : selected.add(itemId);
-            card.classList.toggle('selected', selected.has(itemId));
-            const checkbox = card.querySelector('.item-checkbox');
-            if (checkbox) checkbox.checked = selected.has(itemId);
+        if ($body.classList.contains('selection-mode') && categoryHeader && e.target.type === 'checkbox') {
+            const category = categoryHeader.dataset.category;
+            const itemsInCategory = allItems.filter(item => (item.categoria || 'Outros') === category);
+            const allSelected = itemsInCategory.every(item => selected.has(item.id));
+            itemsInCategory.forEach(item => allSelected ? selected.delete(item.id) : selected.add(item.id));
+            render();
             updateUI();
-        } else {
-            openStockModal(item);
+            return;
+        }
+
+        if (card) {
+            const itemId = parseInt(card.dataset.itemId, 10);
+            const item = allItems.find(i => i.id === itemId);
+            if(!item) return;
+
+            if ($body.classList.contains('selection-mode')) {
+                selected.has(itemId) ? selected.delete(itemId) : selected.add(itemId);
+                render();
+                updateUI();
+            } else {
+                openStockModal(item);
+            }
         }
     });
 
-    $editBtn.addEventListener('click', () => setSelectionMode(true));
+    $shoppingModeBtn.addEventListener('click', () => setSelectionMode(true));
     $doneBtn.addEventListener('click', () => setSelectionMode(false));
-    $selectAllBtn.addEventListener('click', () => { /* ...sem alteração... */ });
     $tabs.forEach(tab => tab.addEventListener('click', (e) => { currentView = e.target.dataset.view; $tabs.forEach(t => t.classList.remove('active')); e.target.classList.add('active'); render(); }));
     $search.addEventListener('input', render);
     $markToBuyBtn.addEventListener('click', markToBuy);
