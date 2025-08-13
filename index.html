@@ -67,14 +67,13 @@
       transform: translateY(100%);
     }
     .footerbar.visible { transform: translateY(0); }
-    #mark-to-buy-btn { display: none; width: 100%; }
+    .footer-content { display: grid; gap: 8px; }
+    #mark-to-buy-btn { display: none; }
     body.selection-mode #mark-to-buy-btn { display: block; }
-    #save-btn-wrapper { display: block; }
-    body.selection-mode #save-btn-wrapper { display: none; }
 
-    /* ===== Modal de Edição de Estoque (CORRIGIDO) ===== */
+    /* ===== Modal de Edição de Estoque ===== */
     .modal-overlay {
-      position: fixed; inset: 0; /* top, left, right, bottom = 0 */
+      position: fixed; inset: 0;
       background: rgba(0,0,0,0.4); z-index: 99;
       display: flex; align-items: center; justify-content: center;
       padding: 1rem;
@@ -83,7 +82,7 @@
     .modal-overlay.visible { opacity: 1; pointer-events: all; }
     .modal {
       background: var(--bg); padding: 24px; border-radius: var(--radius);
-      width: 100%; max-width: 380px; /* Garante que nunca vaze lateralmente */
+      width: 100%; max-width: 380px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.2);
       transform: scale(0.95); transition: transform .2s;
     }
@@ -123,8 +122,10 @@
   <div class="container"> <div id="list"></div> <div id="empty" class="empty" style="display:none;">Nenhum item encontrado.</div> </div>
 
   <div class="footerbar" id="footerbar">
-      <div id="save-btn-wrapper"> <button id="save" class="primary"><span class="btn-text">Salvar Alterações</span></button> </div>
+    <div class="footer-content">
       <button id="mark-to-buy-btn" class="primary"><span class="btn-text">Adicionar à Lista de Compras</span></button>
+      <button id="save" class="primary"><span class="btn-text">Salvar Alterações</span></button>
+    </div>
   </div>
 
   <div class="modal-overlay" id="stock-modal-overlay">
@@ -167,7 +168,7 @@
     const $cancelBtn = document.getElementById('cancel-stock-update');
     const $confirmBtn = document.getElementById('confirm-stock-update');
 
-    // ====== LÓGICA DE UI (MODAL, MODO DE SELEÇÃO, FOOTER) ===============================
+    // ====== LÓGICA DE UI ===================================================================
     function openStockModal(item) {
       activeModalItem = item;
       $modalItemName.textContent = item.nome;
@@ -195,8 +196,12 @@
       
       $selectionInfo.textContent = selectionCount === 0 ? 'Selecionar Itens' : `${selectionCount} ${selectionCount === 1 ? 'item' : 'itens'} selecionado${selectionCount > 1 ? 's' : ''}`;
       
-      const isFooterVisible = (isInSelectionMode && selectionCount > 0) || (!isInSelectionMode && stagedCount > 0);
+      const isFooterVisible = isInSelectionMode || stagedCount > 0;
       $footerbar.classList.toggle('visible', isFooterVisible);
+      
+      $save.style.display = isInSelectionMode ? 'none' : 'block';
+      $markToBuyBtn.style.display = isInSelectionMode ? 'block' : 'none';
+      
       $save.disabled = stagedCount === 0;
     }
     
@@ -292,6 +297,11 @@
       selected.clear();
       render();
       updateUI();
+      // Mostra o botão de salvar explicitamente, já que agora há mudanças
+      $footerbar.classList.add('visible');
+      $save.style.display = 'block';
+      $markToBuyBtn.style.display = 'none';
+      setSelectionMode(false); // Sai do modo de seleção para focar em salvar
     }
     
     async function saveStaged() {
@@ -301,11 +311,10 @@
         const ops = Array.from(staged.entries()).map(([id, patch]) => supabase.from('itens').update(patch).eq('id', id));
         await Promise.all(ops);
         staged.clear();
-        if ($body.classList.contains('selection-mode')) { setSelectionMode(false); }
         await fetchItems();
-        updateUI(); // Garante que o footer suma após salvar
       } catch (e) {
         console.error('Erro ao salvar:', e); alert('Ocorreu um erro ao salvar as alterações.');
+      } finally {
         $save.classList.remove('saving'); updateUI();
       }
     }
@@ -315,6 +324,7 @@
       if (error) { console.error(error); return; }
       allItems = data || [];
       render();
+      updateUI();
     }
 
     // ====== EVENT LISTENERS ===============================================================
