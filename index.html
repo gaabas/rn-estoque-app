@@ -44,20 +44,25 @@
     .operator-name strong { color: var(--text); }
     .operator-name:hover { border-color: #c7d2fe; }
 
-    /* Layout Desktop */
-    @media (min-width: 601px) {
-      .header-wrap { flex-direction: row; align-items: center; }
-      .header-top-row { width: auto; }
-      .toolbar { max-width: 300px; }
-    }
+    @media (min-width: 601px) { .header-wrap { flex-direction: row; align-items: center; } .header-top-row { width: auto; } .toolbar { max-width: 300px; } }
+    @media (max-width: 600px) { .tabs { flex-grow: 1; justify-content: center; } }
     
-    /* Layout Mobile */
-    @media (max-width: 600px) {
-      .tabs { flex-grow: 1; justify-content: center; }
+    /* ===== Conteúdo e Cards ===== */
+    .container{ padding:12px 12px 120px; max-width:1200px; margin:0 auto; }
+    .category-header { display: flex; align-items: center; justify-content: space-between; font-size: 1.1rem; font-weight: 600; color: var(--text); margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .category-header:first-of-type { margin-top: 0; }
+    .category-checkbox { display: none; }
+    body.selection-mode .category-checkbox { display: inline-block; }
+    .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px; }
+    .card{ background:var(--card);border:2px solid var(--border); border-radius:var(--radius);padding:12px; display:flex; gap:8px; box-shadow:var(--shadow); cursor:pointer; transition: border-color .2s, box-shadow .2s; }
+    .item-checkbox { display: none; margin-top: 4px; }
+    body.selection-mode .item-checkbox { display: block; }
+    .card.selected { border-color: var(--primary-color); }
+    /* FIX: Estilo para o card com alterações pendentes */
+    .card.staged {
+      box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.4), var(--shadow);
     }
-    
-    /* ===== Conteúdo, Rodapé, Modals e Login (sem alterações) ===== */
-    .container{ padding:12px 12px 120px; max-width:1200px; margin:0 auto; } .category-header { display: flex; align-items: center; justify-content: space-between; font-size: 1.1rem; font-weight: 600; color: var(--text); margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); } .category-header:first-of-type { margin-top: 0; } .category-checkbox { display: none; } body.selection-mode .category-checkbox { display: inline-block; } .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px; } .card{ background:var(--card);border:2px solid var(--border); border-radius:var(--radius);padding:12px; display:flex; gap:8px; box-shadow:var(--shadow); cursor:pointer; transition: border-color .2s, box-shadow .2s; } .item-checkbox { display: none; margin-top: 4px; } body.selection-mode .item-checkbox { display: block; } .card.selected { border-color: var(--primary-color); } .item-details { flex-grow: 1; display: flex; flex-direction: column; gap: 8px; } .name{ font-weight:700 } .meta{ color:var(--muted);font-size:13px; } .stock-info { font-weight: 600; color: var(--text); } .pill{ padding:4px 10px;border-radius:999px;font-size:12px; font-weight: 500; border:1px solid; align-self: flex-start; } .pill.ok{ border-color:#86efac; color:#065f46; background:rgba(22,163,74,.10); } .pill.warn{ border-color:#fed7aa; color:#7c2d12; background:rgba(217,119,6,.12); } .pill.bad{ border-color:#fecaca; color:#7f1d1d; background:rgba(220,38,38,.10); } .pill.buy{ border-color:#c7d2fe; color:var(--primary-color); background:#eef2ff; }
+    .item-details { flex-grow: 1; display: flex; flex-direction: column; gap: 8px; } .name{ font-weight:700 } .meta{ color:var(--muted);font-size:13px; } .stock-info { font-weight: 600; color: var(--text); } .pill{ padding:4px 10px;border-radius:999px;font-size:12px; font-weight: 500; border:1px solid; align-self: flex-start; } .pill.ok{ border-color:#86efac; color:#065f46; background:rgba(22,163,74,.10); } .pill.warn{ border-color:#fed7aa; color:#7c2d12; background:rgba(217,119,6,.12); } .pill.bad{ border-color:#fecaca; color:#7f1d1d; background:rgba(220,38,38,.10); } .pill.buy{ border-color:#c7d2fe; color:var(--primary-color); background:#eef2ff; }
     .footerbar{ position:fixed; left:0; right:0; bottom:0; z-index: 20; background:rgba(255,255,255,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-top:1px solid var(--border); padding:10px 12px calc(10px + env(safe-area-inset-bottom)); box-shadow:0 -6px 20px rgba(2,6,23,.06); transition: transform 0.3s ease-in-out; transform: translateY(100%); } .footerbar.visible { transform: translateY(0); } .footer-content { display: grid; gap: 8px; } .bulk-actions { display: none; grid-template-columns: 1fr 1fr; gap: 8px; } body.selection-mode .bulk-actions { display: grid; } #save-btn-wrapper { display: block; } body.selection-mode #save-btn-wrapper { display: none; } #save-btn-wrapper button { width: 100%; }
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 99; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; transition: opacity .2s; pointer-events: none; } .modal-overlay.visible { opacity: 1; pointer-events: all; } .modal { background: var(--bg); padding: 24px; border-radius: var(--radius); width: 100%; max-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: scale(0.95); transition: transform .2s; } .modal-overlay.visible .modal { transform: scale(1); } .modal-header { font-size: 1.2rem; font-weight: 600; margin-bottom: 16px; } .modal-input-group { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; } .modal-input-group button { font-size: 1.5rem; width: 44px; height: 44px; padding: 0; line-height: 1; flex-shrink: 0; } #stock-input { flex-grow: 1; text-align: center; font-size: 1.8rem; font-weight: bold; padding: 10px; border: 1px solid var(--border); border-radius: 10px; width: 100%; } #stock-input::-webkit-outer-spin-button, #stock-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; } #stock-input[type=number] { -moz-appearance: textfield; } .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } #modal-list-action-btn { grid-column: 1 / -1; margin-top: 10px; }
     .login-overlay { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 1rem; transition: opacity 0.3s ease-in-out; } .login-overlay.hidden { opacity: 0; pointer-events: none; } .login-box { width: 100%; max-width: 360px; padding: 24px; } .login-title { text-align: center; font-size: 1.5rem; margin-bottom: 24px; } .login-form { display: flex; flex-direction: column; gap: 16px; } .login-form label { font-weight: 500; color: var(--muted); font-size: 0.9rem; margin-bottom: -8px; } .login-input { width: 100%; padding: 12px; font-size: 1rem; border: 1px solid var(--border); border-radius: 10px; background: var(--card); } .login-error-msg { color: var(--bad); text-align: center; min-height: 1.2em; font-size: 0.9rem; margin: 0; }
@@ -82,9 +87,7 @@
           </button>
         </div>
       </div>
-      <div class="toolbar">
-        <input id="search" type="search" placeholder="Buscar item…"/>
-      </div>
+      <div class="toolbar"> <input id="search" type="search" placeholder="Buscar item…"/> </div>
       <div id="selection-header-content">
         <span id="selection-info"></span>
         <button id="done-btn" class="icon-btn" title="Concluir">
@@ -94,7 +97,6 @@
     </div>
   </header>
 
-  <!-- O resto do HTML (container, footerbar, modals) não precisa de alterações -->
   <div class="container"> <div id="list"></div> <div id="empty" class="empty" style="display:none;"></div> </div>
   <div class="footerbar" id="footerbar"> <div class="footer-content"> <div class="bulk-actions"> <button id="add-to-list-btn" class="primary"><span class="btn-text">Adicionar à Lista</span></button> <button id="remove-from-list-btn"><span class="btn-text">Remover da Lista</span></button> </div><div id="save-btn-wrapper"> <button id="save" class="primary"><span class="btn-text">Salvar Alterações</span></button> </div></div></div>
   <div class="modal-overlay" id="stock-modal-overlay"> <div class="modal" id="stock-modal"> <div class="modal-header" id="modal-item-name"></div><div class="modal-input-group"> <button id="decrement-stock">-</button> <input type="number" id="stock-input" min="0" /> <button id="increment-stock">+</button> </div><div class="modal-actions"> <button id="cancel-stock-update">Cancelar</button> <button id="confirm-stock-update" class="primary">Confirmar</button> <button id="modal-list-action-btn"></button> </div></div></div>
@@ -151,30 +153,10 @@
     // ====== LÓGICA DE UI ================================================================
     const getEffectiveValue = (itemId, key) => staged.get(itemId)?.[key]?.new ?? allItems.find(i => i.id === itemId)?.[key];
     
-    function openStockModal(item) {
-        activeModalItem = item;
-        $modalItemName.textContent = item.nome;
-        const effectiveStock = getEffectiveValue(item.id, 'estoqueAtual');
-        const effectiveStatus = getEffectiveValue(item.id, 'status');
-        $stockInput.value = effectiveStock ?? 0;
-        if (effectiveStatus === 'COMPRAR') {
-            $modalListActionBtn.textContent = 'Remover da Lista';
-            $modalListActionBtn.classList.remove('primary');
-        } else {
-            $modalListActionBtn.textContent = 'Adicionar à Lista';
-            $modalListActionBtn.classList.add('primary');
-        }
-        $modalOverlay.classList.add('visible');
-        $body.classList.add('modal-open');
-    }
+    function openStockModal(item) { activeModalItem = item; $modalItemName.textContent = item.nome; const effectiveStock = getEffectiveValue(item.id, 'estoqueAtual'); const effectiveStatus = getEffectiveValue(item.id, 'status'); $stockInput.value = effectiveStock ?? 0; if (effectiveStatus === 'COMPRAR') { $modalListActionBtn.textContent = 'Remover da Lista'; $modalListActionBtn.classList.remove('primary'); } else { $modalListActionBtn.textContent = 'Adicionar à Lista'; $modalListActionBtn.classList.add('primary'); } $modalOverlay.classList.add('visible'); $body.classList.add('modal-open'); }
     function closeStockModal() { $modalOverlay.classList.remove('visible'); $body.classList.remove('modal-open'); activeModalItem = null; }
     
-    function setSelectionMode(isActive) {
-        $body.classList.toggle('selection-mode', isActive);
-        if (!isActive) { selected.clear(); }
-        updateUI();
-        render();
-    }
+    function setSelectionMode(isActive) { $body.classList.toggle('selection-mode', isActive); if (!isActive) { selected.clear(); } updateUI(); render(); }
     
     function updateUI() {
         const selectionCount = selected.size;
@@ -195,6 +177,15 @@
             $removeFromListBtn.disabled = !canRemove;
         }
         $save.disabled = stagedCount === 0;
+
+        // FIX: Atualiza o texto do botão de Salvar dinamicamente
+        const saveBtnText = $save.querySelector('.btn-text');
+        if (stagedCount > 0) {
+            const text = `Salvar ${stagedCount} Alteraç${stagedCount === 1 ? 'ão' : 'ões'}`;
+            saveBtnText.textContent = text;
+        } else {
+            saveBtnText.textContent = 'Salvar Alterações';
+        }
     }
     
     // ====== RENDERIZAÇÃO ==============================================================
@@ -202,12 +193,7 @@
     
     function render() {
         const q = ($search.value || '').toLowerCase();
-        const filtered = allItems.filter(item => {
-            const effectiveStatus = getEffectiveValue(item.id, 'status');
-            const inView = (currentView === 'compras') ? effectiveStatus !== 'OK' : true;
-            const matchesSearch = !q || item.nome.toLowerCase().includes(q) || (item.categoria || '').toLowerCase().includes(q);
-            return inView && matchesSearch;
-        });
+        const filtered = allItems.filter(item => { const effectiveStatus = getEffectiveValue(item.id, 'status'); const inView = (currentView === 'compras') ? effectiveStatus !== 'OK' : true; const matchesSearch = !q || item.nome.toLowerCase().includes(q) || (item.categoria || '').toLowerCase().includes(q); return inView && matchesSearch; });
         $list.innerHTML = '';
         $empty.style.display = filtered.length === 0 ? 'block' : 'none';
         if (filtered.length === 0) return;
@@ -241,6 +227,8 @@
         const effectiveStock = getEffectiveValue(item.id, 'estoqueAtual');
         const s = statusInfo(effectiveStatus);
         cardElement.classList.toggle('selected', selected.has(item.id));
+        // FIX: Adiciona a classe .staged se houver alterações pendentes para este item
+        cardElement.classList.toggle('staged', staged.has(item.id));
         cardElement.innerHTML = ` <input type="checkbox" class="item-checkbox" ${selected.has(item.id) ? 'checked' : ''}> <div class="item-details"> <div class="name">${item.nome}</div> <div class="meta"> <span class="stock-info">${effectiveStock} / ${item.parMin || '?'} ${item.unidade || ''}</span> <span> • Par Mín: ${item.parMin || '?'}</span> </div> <div class="pill ${s.cls}">${s.text}</div> </div> `;
     }
 
@@ -248,6 +236,8 @@
     function calculateStatus(estoque, parMin) { return (estoque <= 0) ? 'FALTA' : (estoque <= parMin) ? 'ALERTA' : 'OK'; }
 
     const stageChange = (itemId, key, newValue) => {
+        const item = allItems.find(i => i.id === itemId);
+        if (!item) return;
         const oldValue = getEffectiveValue(itemId, key);
         if (newValue === oldValue) return;
         
@@ -258,46 +248,14 @@
         });
     };
 
-    function confirmStockUpdate() {
-        if (!activeModalItem) return;
-        const newStock = parseInt($stockInput.value, 10);
-        const newStatus = calculateStatus(newStock, activeModalItem.parMin);
-        stageChange(activeModalItem.id, 'estoqueAtual', newStock);
-        stageChange(activeModalItem.id, 'status', newStatus);
-        closeStockModal(); render(); updateUI();
-    }
-    
-    function toggleListItemInModal() {
-        if (!activeModalItem) return;
-        const oldStatus = getEffectiveValue(activeModalItem.id, 'status');
-        const newStatus = (oldStatus === 'COMPRAR') 
-            ? calculateStatus(getEffectiveValue(activeModalItem.id, 'estoqueAtual'), activeModalItem.parMin)
-            : 'COMPRAR';
-        stageChange(activeModalItem.id, 'status', newStatus);
-        closeStockModal(); render(); updateUI();
-    }
-
-    function bulkUpdateList(action) {
-        if (selected.size === 0) return;
-        selected.forEach(id => {
-            const oldStatus = getEffectiveValue(id, 'status');
-            let newStatus = oldStatus;
-            if (action === 'add' && oldStatus !== 'COMPRAR') {
-                newStatus = 'COMPRAR';
-            } else if (action === 'remove' && oldStatus === 'COMPRAR') {
-                const item = allItems.find(i => i.id === id);
-                newStatus = calculateStatus(getEffectiveValue(id, 'estoqueAtual'), item.parMin);
-            }
-            stageChange(id, 'status', newStatus);
-        });
-        selected.clear(); setSelectionMode(false);
-    }
-    
+    function confirmStockUpdate() { if (!activeModalItem) return; const newStock = parseInt($stockInput.value, 10); const newStatus = calculateStatus(newStock, activeModalItem.parMin); stageChange(activeModalItem.id, 'estoqueAtual', newStock); stageChange(activeModalItem.id, 'status', newStatus); closeStockModal(); render(); updateUI(); }
+    function toggleListItemInModal() { if (!activeModalItem) return; const oldStatus = getEffectiveValue(activeModalItem.id, 'status'); const newStatus = (oldStatus === 'COMPRAR') ? calculateStatus(getEffectiveValue(activeModalItem.id, 'estoqueAtual'), activeModalItem.parMin) : 'COMPRAR'; stageChange(activeModalItem.id, 'status', newStatus); closeStockModal(); render(); updateUI(); }
+    function bulkUpdateList(action) { if (selected.size === 0) return; selected.forEach(id => { const oldStatus = getEffectiveValue(id, 'status'); let newStatus = oldStatus; if (action === 'add' && oldStatus !== 'COMPRAR') { newStatus = 'COMPRAR'; } else if (action === 'remove' && oldStatus === 'COMPRAR') { const item = allItems.find(i => i.id === id); newStatus = calculateStatus(getEffectiveValue(id, 'estoqueAtual'), item.parMin); } stageChange(id, 'status', newStatus); }); selected.clear(); setSelectionMode(false); }
     async function saveStaged() { if (staged.size === 0 || !currentOperator) return; $save.classList.add('saving'); $save.disabled = true; try { const alterationsPayload = Object.fromEntries(staged); const { error } = await supabase.rpc('salvar_alteracoes_e_logar', { p_operador_id: currentOperator.id, p_alteracoes: alterationsPayload }); if (error) { throw error; } staged.clear(); await fetchItems(); } catch (e) { console.error('Erro ao salvar:', e); alert('Ocorreu um erro ao salvar as alterações. Verifique sua conexão e tente novamente.'); } finally { $save.classList.remove('saving'); updateUI(); } }
     async function fetchItems() { const { data, error } = await supabase.from('itens').select('*').order('nome'); if (error) { console.error(error); return; } allItems = data || []; render(); updateUI(); }
 
     // ====== EVENT LISTENERS ==============================================================
-    $list.addEventListener('click', (e) => { const card = e.target.closest('.card'); const categoryHeader = e.target.closest('.category-header'); if ($body.classList.contains('selection-mode') && categoryHeader && e.target.type === 'checkbox') { const category = categoryHeader.dataset.category; groupedItems[category].forEach(item => selected.has(item.id) ? selected.delete(item.id) : selected.add(item.id)); render(); updateUI(); return; } if (card) { const itemId = parseInt(card.dataset.itemId, 10); if ($body.classList.contains('selection-mode')) { selected.has(itemId) ? selected.delete(itemId) : selected.add(itemId); render(); updateUI(); } else { openStockModal(allItems.find(i => i.id === itemId)); } } });
+    $list.addEventListener('click', (e) => { const card = e.target.closest('.card'); const categoryHeader = e.target.closest('.category-header'); if ($body.classList.contains('selection-mode') && categoryHeader && e.target.type === 'checkbox') { const category = categoryHeader.dataset.category; const itemsInCategory = allItems.filter(item => (item.categoria || 'Outros') === category); const allSelected = itemsInCategory.every(item => selected.has(item.id)); itemsInCategory.forEach(item => allSelected ? selected.delete(item.id) : selected.add(item.id)); render(); updateUI(); return; } if (card) { const itemId = parseInt(card.dataset.itemId, 10); if ($body.classList.contains('selection-mode')) { selected.has(itemId) ? selected.delete(itemId) : selected.add(itemId); render(); updateUI(); } else { openStockModal(allItems.find(i => i.id === itemId)); } } });
     $shoppingModeBtn.addEventListener('click', () => setSelectionMode(true)); $doneBtn.addEventListener('click', () => setSelectionMode(false)); $tabs.forEach(tab => tab.addEventListener('click', (e) => { currentView = e.target.dataset.view; $tabs.forEach(t => t.classList.remove('active')); e.target.classList.add('active'); render(); })); $search.addEventListener('input', render); $addToListBtn.addEventListener('click', () => bulkUpdateList('add')); $removeFromListBtn.addEventListener('click', () => bulkUpdateList('remove')); $save.addEventListener('click', saveStaged); $decrementBtn.addEventListener('click', () => { $stockInput.value = Math.max(0, parseInt($stockInput.value, 10) - 1); }); $incrementBtn.addEventListener('click', () => { $stockInput.value = parseInt($stockInput.value, 10) + 1; }); $cancelBtn.addEventListener('click', closeStockModal); $confirmBtn.addEventListener('click', confirmStockUpdate); $modalListActionBtn.addEventListener('click', toggleListItemInModal); $modalOverlay.addEventListener('click', (e) => { if (e.target === $modalOverlay) closeStockModal(); });
     $loginBtn.addEventListener('click', handleLogin); $pinInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleLogin(); }); $logoutBtn.addEventListener('click', handleLogout);
     
