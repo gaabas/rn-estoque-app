@@ -25,7 +25,10 @@
     /* ===== Header ===== */
     header{ position:sticky; top:0; z-index:10; background:rgba(255,255,255,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom:1px solid var(--border); padding:10px 12px; }
     .header-wrap{ display:flex; gap:12px; align-items: center; max-width:1200px; margin:0 auto; }
-    .header-main-content { flex-grow: 1; display:flex; flex-direction: column; gap: 8px; }
+    
+    /* FIX: Adicionado min-width: 0 para corrigir o problema de overflow no mobile */
+    .header-main-content { flex-grow: 1; display:flex; flex-direction: column; gap: 8px; min-width: 0; }
+    
     .header-actions { flex-shrink: 0; }
     .tabs{ display:flex; gap:8px; }
     .tab{ padding:8px 12px;border-radius:10px; background:#fff;border:1px solid var(--border);cursor:pointer; }
@@ -183,10 +186,7 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNscmpxcXp6eHhweXdxdXBodmp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2OTYyMjksImV4cCI6MjA3MDI3MjIyOX0.JuzZMOC2X4NQUXeVdYBoQDY5pN-2O2igPK0zjNdcjcU';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
-    // --> NOVO: Estado de autenticação e operadores
-    let allOperators = [];
-    let currentOperator = null;
-
+    let allOperators = [], currentOperator = null;
     let allItems = [], staged = new Map(), selected = new Set(), currentView = 'producao';
     let activeModalItem = null;
 
@@ -194,10 +194,27 @@
     const $body = document.body;
     const $list = document.getElementById('list');
     const $search = document.getElementById('search');
-    // ... (demais elementos do app principal)
+    const $tabs = document.querySelectorAll('.tab');
+    const $shoppingModeBtn = document.getElementById('shopping-mode-btn');
+    const $doneBtn = document.getElementById('done-btn');
+    const $selectionInfo = document.getElementById('selection-info');
+    const $footerbar = document.getElementById('footerbar');
+    const $addToListBtn = document.getElementById('add-to-list-btn');
+    const $removeFromListBtn = document.getElementById('remove-from-list-btn');
     const $save = document.getElementById('save');
+    const $empty = document.getElementById('empty');
+    
+    // FIX: Readicionando as variáveis de DOM para o modal que foram apagadas
+    const $modalOverlay = document.getElementById('stock-modal-overlay');
+    const $modalItemName = document.getElementById('modal-item-name');
+    const $stockInput = document.getElementById('stock-input');
+    const $decrementBtn = document.getElementById('decrement-stock');
+    const $incrementBtn = document.getElementById('increment-stock');
+    const $cancelBtn = document.getElementById('cancel-stock-update');
+    const $confirmBtn = document.getElementById('confirm-stock-update');
+    const $modalListActionBtn = document.getElementById('modal-list-action-btn');
 
-    // --> NOVO: Elementos do DOM para Login e autenticação
+    // Elementos do DOM para Login e autenticação
     const $loginOverlay = document.getElementById('login-overlay');
     const $operatorSelect = document.getElementById('operator-select');
     const $pinInput = document.getElementById('pin-input');
@@ -208,7 +225,7 @@
     const $logoutBtn = document.getElementById('logout-btn');
 
 
-    // --> NOVO: LÓGICA DE AUTENTICAÇÃO =====================================================
+    // ====== LÓGICA DE AUTENTICAÇÃO =====================================================
     async function initAuth() {
       $body.classList.add('app-locked');
       const { data, error } = await supabase.from('operadores').select('id, nome, pin');
@@ -245,12 +262,10 @@
       const operator = allOperators.find(op => op.id == selectedId);
       
       if (operator && operator.pin === enteredPin) {
-        // Sucesso no login
         currentOperator = operator;
         $pinInput.value = '';
         startApp();
       } else {
-        // Falha no login
         $loginError.textContent = 'PIN incorreto. Tente novamente.';
         $pinInput.value = '';
         $pinInput.focus();
@@ -272,8 +287,7 @@
     }
 
 
-    // ====== LÓGICA DE UI (sem alterações significativas) =================================
-    // ... as funções openStockModal, closeStockModal, setSelectionMode, updateUI permanecem as mesmas
+    // ====== LÓGICA DE UI ===================================================================
     function openStockModal(item) {
       activeModalItem = item;
       $modalItemName.textContent = item.nome;
@@ -295,8 +309,8 @@
     
     function setSelectionMode(isActive) {
       $body.classList.toggle('selection-mode', isActive);
-      document.getElementById('shopping-mode-btn').style.display = isActive ? 'none' : 'flex';
-      document.getElementById('done-btn').style.display = isActive ? 'flex' : 'none';
+      $shoppingModeBtn.style.display = isActive ? 'none' : 'flex';
+      $doneBtn.style.display = isActive ? 'flex' : 'none';
       if (!isActive) { selected.clear(); }
       updateUI();
       render();
@@ -307,12 +321,12 @@
       const stagedCount = staged.size;
       const isInSelectionMode = $body.classList.contains('selection-mode');
       
-      document.getElementById('selection-info').textContent = selectionCount === 0 ? 'Selecionar Itens' : `${selectionCount} ${selectionCount === 1 ? 'item' : 'itens'} selecionado${selectionCount > 1 ? 's' : ''}`;
+      $selectionInfo.textContent = selectionCount === 0 ? 'Selecionar Itens' : `${selectionCount} ${selectionCount === 1 ? 'item' : 'itens'} selecionado${selectionCount > 1 ? 's' : ''}`;
       
       const isFooterVisible = isInSelectionMode || stagedCount > 0;
-      document.getElementById('footerbar').classList.toggle('visible', isFooterVisible);
+      $footerbar.classList.toggle('visible', isFooterVisible);
       
-      $save.style.display = isInSelectionMode ? 'none' : 'block';
+      $save.parentElement.style.display = isInSelectionMode ? 'none' : 'block';
       if (isInSelectionMode) {
         let canAdd = false, canRemove = false;
         selected.forEach(id => {
@@ -323,14 +337,13 @@
                 else canAdd = true;
             }
         });
-        document.getElementById('add-to-list-btn').disabled = !canAdd;
-        document.getElementById('remove-from-list-btn').disabled = !canRemove;
+        $addToListBtn.disabled = !canAdd;
+        $removeFromListBtn.disabled = !canRemove;
       }
       $save.disabled = stagedCount === 0;
     }
 
-    // ====== RENDERIZAÇÃO (sem alterações significativas) ================================
-    // ... as funções render e renderCardContent permanecem as mesmas
+    // ====== RENDERIZAÇÃO =================================================================
     const statusInfo = (s) => ({ 'OK': { text: 'OK', cls: 'ok' }, 'ALERTA': { text: 'Alerta', cls: 'warn' }, 'FALTA': { text: 'Falta', cls: 'bad' }, 'COMPRAR': { text: 'Comprar', cls: 'buy' } }[s] || { text: s, cls: '' });
 
     function render() {
@@ -344,7 +357,7 @@
       });
 
       $list.innerHTML = '';
-      document.getElementById('empty').style.display = filtered.length === 0 ? 'block' : 'none';
+      $empty.style.display = filtered.length === 0 ? 'block' : 'none';
       if (filtered.length === 0) return;
 
       const groupedItems = filtered.reduce((acc, item) => {
@@ -398,7 +411,6 @@
     }
 
     // ====== AÇÕES E BANCO DE DADOS =======================================================
-    // ... as funções calculateStatus, confirmStockUpdate, etc. permanecem as mesmas
     function calculateStatus(estoque, parMin) {
         return (estoque <= 0) ? 'FALTA' : (estoque <= parMin) ? 'ALERTA' : 'OK';
     }
@@ -447,26 +459,18 @@
         setSelectionMode(false);
     }
     
-    // --> NOVO: Função saveStaged() reescrita para usar a RPC
     async function saveStaged() {
       if (staged.size === 0 || !currentOperator) return;
       $save.classList.add('saving'); $save.disabled = true;
 
       try {
-        // Converte o Map para um Objeto que pode ser serializado em JSON
         const alterationsPayload = Object.fromEntries(staged);
-        
-        // Chama a função RPC no Supabase
         const { error } = await supabase.rpc('salvar_alteracoes_e_logar', {
           p_operador_id: currentOperator.id,
           p_alteracoes: alterationsPayload
         });
-
-        if (error) {
-          throw error; // Lança o erro para ser pego pelo bloco catch
-        }
+        if (error) { throw error; }
         
-        // Se a chamada RPC foi bem-sucedida, limpa o estado e busca os dados atualizados
         staged.clear();
         await fetchItems();
 
@@ -488,7 +492,6 @@
     }
 
     // ====== EVENT LISTENERS ===============================================================
-    // ... Event Listeners do app principal permanecem os mesmos
     $list.addEventListener('click', (e) => {
         const card = e.target.closest('.card');
         const categoryHeader = e.target.closest('.category-header');
@@ -516,21 +519,20 @@
             }
         }
     });
-    document.getElementById('shopping-mode-btn').addEventListener('click', () => setSelectionMode(true));
-    document.getElementById('done-btn').addEventListener('click', () => setSelectionMode(false));
-    document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', (e) => { currentView = e.target.dataset.view; document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); e.target.classList.add('active'); render(); }));
+    $shoppingModeBtn.addEventListener('click', () => setSelectionMode(true));
+    $doneBtn.addEventListener('click', () => setSelectionMode(false));
+    $tabs.forEach(tab => tab.addEventListener('click', (e) => { currentView = e.target.dataset.view; $tabs.forEach(t => t.classList.remove('active')); e.target.classList.add('active'); render(); }));
     $search.addEventListener('input', render);
-    document.getElementById('add-to-list-btn').addEventListener('click', () => bulkUpdateList('add'));
-    document.getElementById('remove-from-list-btn').addEventListener('click', () => bulkUpdateList('remove'));
+    $addToListBtn.addEventListener('click', () => bulkUpdateList('add'));
+    $removeFromListBtn.addEventListener('click', () => bulkUpdateList('remove'));
     $save.addEventListener('click', saveStaged);
-    document.getElementById('decrement-stock').addEventListener('click', () => { $stockInput.value = Math.max(0, parseInt($stockInput.value, 10) - 1); });
-    document.getElementById('increment-stock').addEventListener('click', () => { $stockInput.value = parseInt($stockInput.value, 10) + 1; });
-    document.getElementById('cancel-stock-update').addEventListener('click', closeStockModal);
-    document.getElementById('confirm-stock-update').addEventListener('click', confirmStockUpdate);
-    document.getElementById('modal-list-action-btn').addEventListener('click', toggleListItemInModal);
-    document.getElementById('stock-modal-overlay').addEventListener('click', (e) => { if (e.target === document.getElementById('stock-modal-overlay')) closeStockModal(); });
-
-    // --> NOVO: Event Listeners para autenticação
+    $decrementBtn.addEventListener('click', () => { $stockInput.value = Math.max(0, parseInt($stockInput.value, 10) - 1); });
+    $incrementBtn.addEventListener('click', () => { $stockInput.value = parseInt($stockInput.value, 10) + 1; });
+    $cancelBtn.addEventListener('click', closeStockModal);
+    $confirmBtn.addEventListener('click', confirmStockUpdate);
+    $modalListActionBtn.addEventListener('click', toggleListItemInModal);
+    $modalOverlay.addEventListener('click', (e) => { if (e.target === $modalOverlay) closeStockModal(); });
+    
     $loginBtn.addEventListener('click', handleLogin);
     $pinInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleLogin(); });
     $logoutBtn.addEventListener('click', handleLogout);
