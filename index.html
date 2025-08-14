@@ -63,8 +63,8 @@
     .footerbar{ position:fixed; left:0; right:0; bottom:0; z-index: 20; background:rgba(255,255,255,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-top:1px solid var(--border); padding:10px 12px calc(10px + env(safe-area-inset-bottom)); box-shadow:0 -6px 20px rgba(2,6,23,.06); transition: transform 0.3s ease-in-out; transform: translateY(100%); }
     .footerbar.visible { transform: translateY(0); }
     .footer-content { display: grid; gap: 8px; }
-    #mark-to-buy-btn { display: none; }
-    body.selection-mode #mark-to-buy-btn { display: block; }
+    .bulk-actions { display: none; grid-template-columns: 1fr 1fr; gap: 8px; } /* Botões de ação em massa */
+    body.selection-mode .bulk-actions { display: grid; }
     #save-btn-wrapper { display: block; }
     body.selection-mode #save-btn-wrapper { display: none; }
 
@@ -80,13 +80,12 @@
     #stock-input::-webkit-outer-spin-button, #stock-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     #stock-input[type=number] { -moz-appearance: textfield; }
     .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .modal-actions button { flex-grow: 1; padding: 12px; }
-    #modal-list-action-btn { grid-column: 1 / -1; margin-top: 10px; } /* Botão novo */
+    #modal-list-action-btn { grid-column: 1 / -1; margin-top: 10px; }
 
     /* ===== Outros Estilos ===== */
-    button { cursor:pointer;border-radius:10px;border:1px solid var(--border); background:#f8fafc;color:var(--text);padding:12px 10px;font-size:1rem; position: relative; transition: background .2s; }
+    button { cursor:pointer;border-radius:10px;border:1px solid var(--border); background:#f8fafc;color:var(--text);padding:12px 10px;font-size:1rem; position: relative; transition: background .2s, color .2s; }
     button.primary{ background:var(--primary-color);color:#fff; border-color:var(--primary-color); font-weight:600; }
-    button:disabled { background: #e2e8f0; color: var(--muted); cursor: not-allowed; }
+    button:disabled { background: #e2e8f0; color: var(--muted); cursor: not-allowed; border-color: var(--border); }
     button.saving .btn-text { visibility: hidden; }
     button.saving::after { content: ''; display: block; position: absolute; top: 50%; left: 50%; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.5); border-top-color: #fff; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -117,8 +116,13 @@
 
   <div class="footerbar" id="footerbar">
     <div class="footer-content">
-      <button id="mark-to-buy-btn" class="primary"><span class="btn-text">Adicionar à Lista de Compras</span></button>
-      <div id="save-btn-wrapper"> <button id="save" class="primary"><span class="btn-text">Salvar Alterações</span></button> </div>
+      <div class="bulk-actions">
+          <button id="add-to-list-btn" class="primary"><span class="btn-text">Adicionar à Lista</span></button>
+          <button id="remove-from-list-btn"><span class="btn-text">Remover da Lista</span></button>
+      </div>
+      <div id="save-btn-wrapper">
+        <button id="save" class="primary"><span class="btn-text">Salvar Alterações</span></button>
+      </div>
     </div>
   </div>
 
@@ -129,7 +133,7 @@
       <div class="modal-actions">
         <button id="cancel-stock-update">Cancelar</button>
         <button id="confirm-stock-update" class="primary">Confirmar</button>
-        <button id="modal-list-action-btn"></button> <!-- Botão novo -->
+        <button id="modal-list-action-btn"></button>
       </div>
     </div>
   </div>
@@ -154,7 +158,8 @@
     const $doneBtn = document.getElementById('done-btn');
     const $selectionInfo = document.getElementById('selection-info');
     const $footerbar = document.getElementById('footerbar');
-    const $markToBuyBtn = document.getElementById('mark-to-buy-btn');
+    const $addToListBtn = document.getElementById('add-to-list-btn');
+    const $removeFromListBtn = document.getElementById('remove-from-list-btn');
     const $save = document.getElementById('save');
     const $empty = document.getElementById('empty');
     const $modalOverlay = document.getElementById('stock-modal-overlay');
@@ -170,13 +175,10 @@
     function openStockModal(item) {
       activeModalItem = item;
       $modalItemName.textContent = item.nome;
-      
-      const stagedItem = staged.get(item.id) || {};
-      const effectiveStock = stagedItem.estoqueAtual ?? item.estoqueAtual;
-      const effectiveStatus = stagedItem.status || item.status;
+      const effectiveStock = staged.get(item.id)?.estoqueAtual ?? item.estoqueAtual;
+      const effectiveStatus = staged.get(item.id)?.status || item.status;
 
-      $stockInput.value = effectiveStock || 0;
-      
+      $stockInput.value = effectiveStock ?? 0;
       if (effectiveStatus === 'COMPRAR') {
         $modalListActionBtn.textContent = 'Remover da Lista';
         $modalListActionBtn.classList.remove('primary');
@@ -184,10 +186,8 @@
         $modalListActionBtn.textContent = 'Adicionar à Lista';
         $modalListActionBtn.classList.add('primary');
       }
-
       $modalOverlay.classList.add('visible');
       $body.classList.add('modal-open');
-      $stockInput.focus(); $stockInput.select();
     }
     function closeStockModal() { $modalOverlay.classList.remove('visible'); $body.classList.remove('modal-open'); activeModalItem = null; }
     
@@ -211,8 +211,19 @@
       $footerbar.classList.toggle('visible', isFooterVisible);
       
       $save.style.display = isInSelectionMode ? 'none' : 'block';
-      $markToBuyBtn.style.display = isInSelectionMode ? 'block' : 'none';
-      
+      if (isInSelectionMode) {
+        let canAdd = false, canRemove = false;
+        selected.forEach(id => {
+            const item = allItems.find(i => i.id === id);
+            if(item) {
+                const effectiveStatus = staged.get(id)?.status || item.status;
+                if (effectiveStatus === 'COMPRAR') canRemove = true;
+                else canAdd = true;
+            }
+        });
+        $addToListBtn.disabled = !canAdd;
+        $removeFromListBtn.disabled = !canRemove;
+      }
       $save.disabled = stagedCount === 0;
     }
     
@@ -303,26 +314,33 @@
         const { id, estoqueAtual, parMin } = activeModalItem;
         const stagedItem = staged.get(id) || {};
         const effectiveStatus = stagedItem.status || activeModalItem.status;
-
-        let novoStatus;
-        if (effectiveStatus === 'COMPRAR') {
-            novoStatus = calculateStatus(stagedItem.estoqueAtual ?? estoqueAtual, parMin); // Reverte para o status automático
-        } else {
-            novoStatus = 'COMPRAR';
-        }
+        let novoStatus = (effectiveStatus === 'COMPRAR') ? calculateStatus(stagedItem.estoqueAtual ?? estoqueAtual, parMin) : 'COMPRAR';
         staged.set(id, { ...stagedItem, status: novoStatus });
         closeStockModal();
         render();
         updateUI();
     }
 
-    function markToBuy() {
-      if(selected.size === 0) return;
-      selected.forEach(id => { staged.set(id, { ...staged.get(id), status: 'COMPRAR' }); });
-      selected.clear();
-      render();
-      updateUI();
-      setSelectionMode(false);
+    function bulkUpdateList(action) {
+        if (selected.size === 0) return;
+        selected.forEach(id => {
+            const item = allItems.find(i => i.id === id);
+            if (!item) return;
+            const stagedItem = staged.get(id) || {};
+            const effectiveStatus = stagedItem.status || item.status;
+
+            if (action === 'add' && effectiveStatus !== 'COMPRAR') {
+                staged.set(id, { ...stagedItem, status: 'COMPRAR' });
+            } else if (action === 'remove' && effectiveStatus === 'COMPRAR') {
+                const effectiveStock = stagedItem.estoqueAtual ?? item.estoqueAtual;
+                const newStatus = calculateStatus(effectiveStock, item.parMin);
+                staged.set(id, { ...stagedItem, status: newStatus });
+            }
+        });
+        selected.clear();
+        render();
+        updateUI();
+        setSelectionMode(false);
     }
     
     async function saveStaged() {
@@ -369,7 +387,9 @@
             if(!item) return;
             if ($body.classList.contains('selection-mode')) {
                 selected.has(itemId) ? selected.delete(itemId) : selected.add(itemId);
-                render();
+                card.classList.toggle('selected', selected.has(item.id));
+                const checkbox = card.querySelector('.item-checkbox');
+                if (checkbox) checkbox.checked = selected.has(item.id);
                 updateUI();
             } else {
                 openStockModal(item);
@@ -381,7 +401,8 @@
     $doneBtn.addEventListener('click', () => setSelectionMode(false));
     $tabs.forEach(tab => tab.addEventListener('click', (e) => { currentView = e.target.dataset.view; $tabs.forEach(t => t.classList.remove('active')); e.target.classList.add('active'); render(); }));
     $search.addEventListener('input', render);
-    $markToBuyBtn.addEventListener('click', markToBuy);
+    $addToListBtn.addEventListener('click', () => bulkUpdateList('add'));
+    $removeFromListBtn.addEventListener('click', () => bulkUpdateList('remove'));
     $save.addEventListener('click', saveStaged);
     $decrementBtn.addEventListener('click', () => { $stockInput.value = Math.max(0, parseInt($stockInput.value, 10) - 1); });
     $incrementBtn.addEventListener('click', () => { $stockInput.value = parseInt($stockInput.value, 10) + 1; });
