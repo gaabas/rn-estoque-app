@@ -22,161 +22,83 @@
     body.modal-open { overflow: hidden; }
     body.app-locked header, body.app-locked .container, body.app-locked .footerbar { display: none; }
 
-    /* ===== Header ===== */
+    /* ===== Header v2 ===== */
     header{ position:sticky; top:0; z-index:10; background:rgba(255,255,255,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom:1px solid var(--border); padding:10px 12px; }
-    .header-wrap{ display:flex; gap:12px; align-items: center; max-width:1200px; margin:0 auto; }
-    
-    /* FIX: Adicionado min-width: 0 para corrigir o problema de overflow no mobile */
-    .header-main-content { flex-grow: 1; display:flex; flex-direction: column; gap: 8px; min-width: 0; }
-    
-    .header-actions { flex-shrink: 0; }
+    .header-wrap{ display:flex; flex-direction:column; gap:8px; max-width:1200px; margin:0 auto; }
+    .header-top-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; }
     .tabs{ display:flex; gap:8px; }
+    .header-actions { flex-shrink: 0; }
     .tab{ padding:8px 12px;border-radius:10px; background:#fff;border:1px solid var(--border);cursor:pointer; }
     .tab.active{ background:#eef2ff; border-color:#c7d2fe; color:var(--primary-color); font-weight:600; }
+    .toolbar { width: 100%; }
     .toolbar input{ background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:1rem; width: 100%; }
     .icon-btn { background:transparent; border:none; padding:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; color: var(--muted); }
     .icon-btn:hover { color: var(--text); background: #f1f5f9; border-radius: 50%;}
     .icon-btn svg { width: 24px; height: 24px; }
     #selection-header-content { display: none; }
-    body.selection-mode .header-main-content, body.selection-mode #shopping-mode-btn, body.selection-mode #operator-info { display: none; }
-    body.selection-mode #selection-header-content { display: flex; flex-grow: 1; align-items: center; justify-content: space-between; }
+    body.selection-mode .header-top-row, body.selection-mode .toolbar { display: none; }
+    body.selection-mode #selection-header-content { display: flex; width:100%; align-items: center; justify-content: space-between; }
     #selection-info { font-weight: 600; color: var(--primary-color); }
-    .operator-info-container { display: flex; align-items: center; gap: 8px; flex-shrink: 0; background: #f1f5f9; padding: 6px 6px 6px 12px; border-radius: 99px; }
-    .operator-name { font-size: 0.9rem; font-weight: 600; color: var(--muted); }
+    .operator-info-container { flex-shrink: 0; }
+    .operator-name { font-size: 0.9rem; font-weight: 600; color: var(--muted); background: #f1f5f9; padding: 8px 12px; border-radius: 99px; cursor: pointer; border: 1px solid var(--border); }
     .operator-name strong { color: var(--text); }
+    .operator-name:hover { border-color: #c7d2fe; }
 
-    /* ===== Conteúdo e Cards ===== */
-    .container{ padding:12px 12px 120px; max-width:1200px; margin:0 auto; }
-    .category-header { display: flex; align-items: center; justify-content: space-between; font-size: 1.1rem; font-weight: 600; color: var(--text); margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
-    .category-header:first-of-type { margin-top: 0; }
-    .category-checkbox { display: none; }
-    body.selection-mode .category-checkbox { display: inline-block; }
-    .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px; }
-    .card{ background:var(--card);border:2px solid var(--border); border-radius:var(--radius);padding:12px; display:flex; gap:8px; box-shadow:var(--shadow); cursor:pointer; transition: border-color .2s, box-shadow .2s; }
-    .item-checkbox { display: none; margin-top: 4px; }
-    body.selection-mode .item-checkbox { display: block; }
-    .card.selected { border-color: var(--primary-color); }
-    .item-details { flex-grow: 1; display: flex; flex-direction: column; gap: 8px; }
-    .name{ font-weight:700 }
-    .meta{ color:var(--muted);font-size:13px; }
-    .stock-info { font-weight: 600; color: var(--text); }
-    .pill{ padding:4px 10px;border-radius:999px;font-size:12px; font-weight: 500; border:1px solid; align-self: flex-start; }
-    .pill.ok{ border-color:#86efac; color:#065f46; background:rgba(22,163,74,.10); }
-    .pill.warn{ border-color:#fed7aa; color:#7c2d12; background:rgba(217,119,6,.12); }
-    .pill.bad{ border-color:#fecaca; color:#7f1d1d; background:rgba(220,38,38,.10); }
-    .pill.buy{ border-color:#c7d2fe; color:var(--primary-color); background:#eef2ff; }
-
-    /* ===== Rodapé ===== */
-    .footerbar{ position:fixed; left:0; right:0; bottom:0; z-index: 20; background:rgba(255,255,255,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-top:1px solid var(--border); padding:10px 12px calc(10px + env(safe-area-inset-bottom)); box-shadow:0 -6px 20px rgba(2,6,23,.06); transition: transform 0.3s ease-in-out; transform: translateY(100%); }
-    .footerbar.visible { transform: translateY(0); }
-    .footer-content { display: grid; gap: 8px; }
-    .bulk-actions { display: none; grid-template-columns: 1fr 1fr; gap: 8px; }
-    body.selection-mode .bulk-actions { display: grid; }
-    #save-btn-wrapper { display: block; }
-    body.selection-mode #save-btn-wrapper { display: none; }
-    #save-btn-wrapper button { width: 100%; }
-
-    /* ===== Modal de Edição de Estoque ===== */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 99; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; transition: opacity .2s; pointer-events: none; }
-    .modal-overlay.visible { opacity: 1; pointer-events: all; }
-    .modal { background: var(--bg); padding: 24px; border-radius: var(--radius); width: 100%; max-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: scale(0.95); transition: transform .2s; }
-    .modal-overlay.visible .modal { transform: scale(1); }
-    .modal-header { font-size: 1.2rem; font-weight: 600; margin-bottom: 16px; }
-    .modal-input-group { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
-    .modal-input-group button { font-size: 1.5rem; width: 44px; height: 44px; padding: 0; line-height: 1; flex-shrink: 0; }
-    #stock-input { flex-grow: 1; text-align: center; font-size: 1.8rem; font-weight: bold; padding: 10px; border: 1px solid var(--border); border-radius: 10px; width: 100%; }
-    #stock-input::-webkit-outer-spin-button, #stock-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    #stock-input[type=number] { -moz-appearance: textfield; }
-    .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    #modal-list-action-btn { grid-column: 1 / -1; margin-top: 10px; }
-
-    /* ===== Tela de Login ===== */
-    .login-overlay { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 1rem; transition: opacity 0.3s ease-in-out; }
-    .login-overlay.hidden { opacity: 0; pointer-events: none; }
-    .login-box { width: 100%; max-width: 360px; padding: 24px; }
-    .login-title { text-align: center; font-size: 1.5rem; margin-bottom: 24px; }
-    .login-form { display: flex; flex-direction: column; gap: 16px; }
-    .login-form label { font-weight: 500; color: var(--muted); font-size: 0.9rem; margin-bottom: -8px; }
-    .login-input { width: 100%; padding: 12px; font-size: 1rem; border: 1px solid var(--border); border-radius: 10px; background: var(--card); }
-    .login-error-msg { color: var(--bad); text-align: center; min-height: 1.2em; font-size: 0.9rem; margin: 0; }
-
-    /* ===== Outros Estilos ===== */
-    button { cursor:pointer;border-radius:10px;border:1px solid var(--border); background:#f8fafc;color:var(--text);padding:12px 10px;font-size:1rem; position: relative; transition: background .2s, color .2s; }
-    button.primary{ background:var(--primary-color);color:#fff; border-color:var(--primary-color); font-weight:600; }
-    button:disabled { background: #e2e8f0; color: var(--muted); cursor: not-allowed; border-color: var(--border); }
-    button.saving .btn-text { visibility: hidden; }
-    button.saving::after { content: ''; display: block; position: absolute; top: 50%; left: 50%; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.5); border-top-color: #fff; animation: spin 0.8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .empty{ color:#64748b; font-style:italic; padding:24px 0; text-align:center; }
+    /* Layout Desktop */
+    @media (min-width: 601px) {
+      .header-wrap { flex-direction: row; align-items: center; }
+      .header-top-row { width: auto; }
+      .toolbar { max-width: 300px; }
+    }
+    
+    /* Layout Mobile */
+    @media (max-width: 600px) {
+      .tabs { flex-grow: 1; justify-content: center; }
+    }
+    
+    /* ===== Conteúdo, Rodapé, Modals e Login (sem alterações) ===== */
+    .container{ padding:12px 12px 120px; max-width:1200px; margin:0 auto; } .category-header { display: flex; align-items: center; justify-content: space-between; font-size: 1.1rem; font-weight: 600; color: var(--text); margin: 24px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); } .category-header:first-of-type { margin-top: 0; } .category-checkbox { display: none; } body.selection-mode .category-checkbox { display: inline-block; } .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px; } .card{ background:var(--card);border:2px solid var(--border); border-radius:var(--radius);padding:12px; display:flex; gap:8px; box-shadow:var(--shadow); cursor:pointer; transition: border-color .2s, box-shadow .2s; } .item-checkbox { display: none; margin-top: 4px; } body.selection-mode .item-checkbox { display: block; } .card.selected { border-color: var(--primary-color); } .item-details { flex-grow: 1; display: flex; flex-direction: column; gap: 8px; } .name{ font-weight:700 } .meta{ color:var(--muted);font-size:13px; } .stock-info { font-weight: 600; color: var(--text); } .pill{ padding:4px 10px;border-radius:999px;font-size:12px; font-weight: 500; border:1px solid; align-self: flex-start; } .pill.ok{ border-color:#86efac; color:#065f46; background:rgba(22,163,74,.10); } .pill.warn{ border-color:#fed7aa; color:#7c2d12; background:rgba(217,119,6,.12); } .pill.bad{ border-color:#fecaca; color:#7f1d1d; background:rgba(220,38,38,.10); } .pill.buy{ border-color:#c7d2fe; color:var(--primary-color); background:#eef2ff; }
+    .footerbar{ position:fixed; left:0; right:0; bottom:0; z-index: 20; background:rgba(255,255,255,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-top:1px solid var(--border); padding:10px 12px calc(10px + env(safe-area-inset-bottom)); box-shadow:0 -6px 20px rgba(2,6,23,.06); transition: transform 0.3s ease-in-out; transform: translateY(100%); } .footerbar.visible { transform: translateY(0); } .footer-content { display: grid; gap: 8px; } .bulk-actions { display: none; grid-template-columns: 1fr 1fr; gap: 8px; } body.selection-mode .bulk-actions { display: grid; } #save-btn-wrapper { display: block; } body.selection-mode #save-btn-wrapper { display: none; } #save-btn-wrapper button { width: 100%; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 99; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; transition: opacity .2s; pointer-events: none; } .modal-overlay.visible { opacity: 1; pointer-events: all; } .modal { background: var(--bg); padding: 24px; border-radius: var(--radius); width: 100%; max-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: scale(0.95); transition: transform .2s; } .modal-overlay.visible .modal { transform: scale(1); } .modal-header { font-size: 1.2rem; font-weight: 600; margin-bottom: 16px; } .modal-input-group { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; } .modal-input-group button { font-size: 1.5rem; width: 44px; height: 44px; padding: 0; line-height: 1; flex-shrink: 0; } #stock-input { flex-grow: 1; text-align: center; font-size: 1.8rem; font-weight: bold; padding: 10px; border: 1px solid var(--border); border-radius: 10px; width: 100%; } #stock-input::-webkit-outer-spin-button, #stock-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; } #stock-input[type=number] { -moz-appearance: textfield; } .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } #modal-list-action-btn { grid-column: 1 / -1; margin-top: 10px; }
+    .login-overlay { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 1rem; transition: opacity 0.3s ease-in-out; } .login-overlay.hidden { opacity: 0; pointer-events: none; } .login-box { width: 100%; max-width: 360px; padding: 24px; } .login-title { text-align: center; font-size: 1.5rem; margin-bottom: 24px; } .login-form { display: flex; flex-direction: column; gap: 16px; } .login-form label { font-weight: 500; color: var(--muted); font-size: 0.9rem; margin-bottom: -8px; } .login-input { width: 100%; padding: 12px; font-size: 1rem; border: 1px solid var(--border); border-radius: 10px; background: var(--card); } .login-error-msg { color: var(--bad); text-align: center; min-height: 1.2em; font-size: 0.9rem; margin: 0; }
+    button { cursor:pointer;border-radius:10px;border:1px solid var(--border); background:#f8fafc;color:var(--text);padding:12px 10px;font-size:1rem; position: relative; transition: background .2s, color .2s; } button.primary{ background:var(--primary-color);color:#fff; border-color:var(--primary-color); font-weight:600; } button:disabled { background: #e2e8f0; color: var(--muted); cursor: not-allowed; border-color: var(--border); } button.saving .btn-text { visibility: hidden; } button.saving::after { content: ''; display: block; position: absolute; top: 50%; left: 50%; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.5); border-top-color: #fff; animation: spin 0.8s linear infinite; } @keyframes spin { to { transform: rotate(360deg); } } .empty{ color:#64748b; font-style:italic; padding:24px 0; text-align:center; }
   </style>
 </head>
 <body class="app-locked">
   
   <header>
     <div class="header-wrap">
-      <div class="header-main-content">
-        <div class="tabs"> <button class="tab active" data-view="producao">Produção</button> <button class="tab" data-view="compras">Compras</button> </div>
-        <div class="toolbar"> <input id="search" type="search" placeholder="Buscar item…"/> </div>
+      <div class="header-top-row">
+        <div id="operator-info" class="operator-info-container" style="display: none;">
+          <span id="logout-btn" class="operator-name" title="Trocar Operador"></span>
+        </div>
+        <div class="tabs">
+          <button class="tab active" data-view="producao">Produção</button>
+          <button class="tab" data-view="compras">Compras</button>
+        </div>
+        <div class="header-actions">
+          <button id="shopping-mode-btn" class="icon-btn" title="Marcar itens para comprar">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11 2a1 1 0 1 0 0 2h10a1 1 0 1 0 0-2H11ZM3 2a1 1 0 0 0-1 1v18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H3Zm1 2h16v16H4V4Zm8 3a1 1 0 0 1 1 1v3h3a1 1 0 1 1 0 2h-3v3a1 1 0 1 1-2 0v-3H8a1 1 0 1 1 0-2h3V8a1 1 0 0 1 1-1Z"/></svg>
+          </button>
+        </div>
       </div>
-      <div id="operator-info" class="operator-info-container" style="display: none;">
-        <span class="operator-name"></span>
-        <button id="logout-btn" class="icon-btn" title="Trocar Operador">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-3.5-8.5 4-4-4-4-1.414 1.414L8.586 11H4v2h4.586l-1.5 1.5 1.414 1.414zm7-4-4 4 4 4 1.414-1.414L15.414 13H20v-2h-4.586l1.5-1.5-1.414-1.414z"/></svg>
-        </button>
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="Buscar item…"/>
       </div>
-      <div id="selection-header-content"> <span id="selection-info"></span></div>
-      <div class="header-actions">
-        <button id="shopping-mode-btn" class="icon-btn" title="Marcar itens para comprar">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11 2a1 1 0 1 0 0 2h10a1 1 0 1 0 0-2H11ZM3 2a1 1 0 0 0-1 1v18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H3Zm1 2h16v16H4V4Zm8 3a1 1 0 0 1 1 1v3h3a1 1 0 1 1 0 2h-3v3a1 1 0 1 1-2 0v-3H8a1 1 0 1 1 0-2h3V8a1 1 0 0 1 1-1Z"/></svg>
-        </button>
-        <button id="done-btn" class="icon-btn" title="Concluir" style="display: none;">
+      <div id="selection-header-content">
+        <span id="selection-info"></span>
+        <button id="done-btn" class="icon-btn" title="Concluir">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z"/></svg>
         </button>
       </div>
     </div>
   </header>
 
-  <div class="container"> <div id="list"></div> <div id="empty" class="empty" style="display:none;">Nenhum item encontrado.</div> </div>
-
-  <div class="footerbar" id="footerbar">
-    <div class="footer-content">
-      <div class="bulk-actions">
-          <button id="add-to-list-btn" class="primary"><span class="btn-text">Adicionar à Lista</span></button>
-          <button id="remove-from-list-btn"><span class="btn-text">Remover da Lista</span></button>
-      </div>
-      <div id="save-btn-wrapper">
-        <button id="save" class="primary"><span class="btn-text">Salvar Alterações</span></button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="stock-modal-overlay">
-    <div class="modal" id="stock-modal">
-      <div class="modal-header" id="modal-item-name"></div>
-      <div class="modal-input-group"> <button id="decrement-stock">-</button> <input type="number" id="stock-input" min="0" /> <button id="increment-stock">+</button> </div>
-      <div class="modal-actions">
-        <button id="cancel-stock-update">Cancelar</button>
-        <button id="confirm-stock-update" class="primary">Confirmar</button>
-        <button id="modal-list-action-btn"></button>
-      </div>
-    </div>
-  </div>
-
-  <div class="login-overlay" id="login-overlay">
-    <div class="login-box">
-      <h2 class="login-title">Identifique-se</h2>
-      <div class="login-form">
-        <label for="operator-select">Operador</label>
-        <select id="operator-select" class="login-input">
-          <option value="">Carregando operadores...</option>
-        </select>
-        <label for="pin-input">PIN</label>
-        <input type="password" id="pin-input" class="login-input" pattern="[0-9]*" inputmode="numeric" placeholder="Digite seu PIN">
-        <button id="login-btn" class="primary">Entrar</button>
-        <p id="login-error" class="login-error-msg"></p>
-      </div>
-    </div>
-  </div>
+  <!-- O resto do HTML (container, footerbar, modals) não precisa de alterações -->
+  <div class="container"> <div id="list"></div> <div id="empty" class="empty" style="display:none;"></div> </div>
+  <div class="footerbar" id="footerbar"> <div class="footer-content"> <div class="bulk-actions"> <button id="add-to-list-btn" class="primary"><span class="btn-text">Adicionar à Lista</span></button> <button id="remove-from-list-btn"><span class="btn-text">Remover da Lista</span></button> </div><div id="save-btn-wrapper"> <button id="save" class="primary"><span class="btn-text">Salvar Alterações</span></button> </div></div></div>
+  <div class="modal-overlay" id="stock-modal-overlay"> <div class="modal" id="stock-modal"> <div class="modal-header" id="modal-item-name"></div><div class="modal-input-group"> <button id="decrement-stock">-</button> <input type="number" id="stock-input" min="0" /> <button id="increment-stock">+</button> </div><div class="modal-actions"> <button id="cancel-stock-update">Cancelar</button> <button id="confirm-stock-update" class="primary">Confirmar</button> <button id="modal-list-action-btn"></button> </div></div></div>
+  <div class="login-overlay" id="login-overlay"> <div class="login-box"> <h2 class="login-title">Identifique-se</h2> <div class="login-form"> <label for="operator-select">Operador</label> <select id="operator-select" class="login-input"> <option value="">Carregando operadores...</option> </select> <label for="pin-input">PIN</label> <input type="password" id="pin-input" class="login-input" pattern="[0-9]*" inputmode="numeric" placeholder="Digite seu PIN"> <button id="login-btn" class="primary">Entrar</button> <p id="login-error" class="login-error-msg"></p> </div></div></div>
 
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -203,8 +125,6 @@
     const $removeFromListBtn = document.getElementById('remove-from-list-btn');
     const $save = document.getElementById('save');
     const $empty = document.getElementById('empty');
-    
-    // FIX: Readicionando as variáveis de DOM para o modal que foram apagadas
     const $modalOverlay = document.getElementById('stock-modal-overlay');
     const $modalItemName = document.getElementById('modal-item-name');
     const $stockInput = document.getElementById('stock-input');
@@ -213,329 +133,173 @@
     const $cancelBtn = document.getElementById('cancel-stock-update');
     const $confirmBtn = document.getElementById('confirm-stock-update');
     const $modalListActionBtn = document.getElementById('modal-list-action-btn');
-
-    // Elementos do DOM para Login e autenticação
     const $loginOverlay = document.getElementById('login-overlay');
     const $operatorSelect = document.getElementById('operator-select');
     const $pinInput = document.getElementById('pin-input');
     const $loginBtn = document.getElementById('login-btn');
     const $loginError = document.getElementById('login-error');
     const $operatorInfo = document.getElementById('operator-info');
-    const $operatorNameSpan = $operatorInfo.querySelector('.operator-name');
     const $logoutBtn = document.getElementById('logout-btn');
 
+    // ====== LÓGICA DE AUTENTICAÇÃO =======================================================
+    async function initAuth() { $body.classList.add('app-locked'); const { data, error } = await supabase.from('operadores').select('id, nome, pin'); if (error) { alert('Erro ao carregar operadores. Verifique a conexão e tente recarregar.'); return; } allOperators = data || []; loadOperatorsAndShowLogin(); }
+    function loadOperatorsAndShowLogin() { $operatorSelect.innerHTML = '<option value="" disabled selected>Selecione seu nome</option>'; allOperators.forEach(op => { const option = document.createElement('option'); option.value = op.id; option.textContent = op.nome; $operatorSelect.appendChild(option); }); $body.classList.add('app-locked'); $loginOverlay.classList.remove('hidden'); }
+    function handleLogin() { const selectedId = $operatorSelect.value; const enteredPin = $pinInput.value; $loginError.textContent = ''; if (!selectedId || !enteredPin) { $loginError.textContent = 'Por favor, selecione seu nome e digite o PIN.'; return; } const operator = allOperators.find(op => op.id == selectedId); if (operator && operator.pin === enteredPin) { currentOperator = operator; $pinInput.value = ''; startApp(); } else { $loginError.textContent = 'PIN incorreto. Tente novamente.'; $pinInput.value = ''; $pinInput.focus(); } }
+    function handleLogout() { currentOperator = null; staged.clear(); selected.clear(); loadOperatorsAndShowLogin(); }
+    function startApp() { $loginOverlay.classList.add('hidden'); $body.classList.remove('app-locked'); $operatorInfo.style.display = 'flex'; $logoutBtn.innerHTML = `👤 <strong>${currentOperator.nome}</strong>`; fetchItems(); }
 
-    // ====== LÓGICA DE AUTENTICAÇÃO =====================================================
-    async function initAuth() {
-      $body.classList.add('app-locked');
-      const { data, error } = await supabase.from('operadores').select('id, nome, pin');
-      if (error) {
-        alert('Erro ao carregar operadores. Verifique a conexão e tente recarregar.');
-        return;
-      }
-      allOperators = data || [];
-      loadOperatorsAndShowLogin();
-    }
-
-    function loadOperatorsAndShowLogin() {
-      $operatorSelect.innerHTML = '<option value="" disabled selected>Selecione seu nome</option>';
-      allOperators.forEach(op => {
-        const option = document.createElement('option');
-        option.value = op.id;
-        option.textContent = op.nome;
-        $operatorSelect.appendChild(option);
-      });
-      $body.classList.add('app-locked');
-      $loginOverlay.classList.remove('hidden');
-    }
-
-    function handleLogin() {
-      const selectedId = $operatorSelect.value;
-      const enteredPin = $pinInput.value;
-      $loginError.textContent = '';
-
-      if (!selectedId || !enteredPin) {
-        $loginError.textContent = 'Por favor, selecione seu nome e digite o PIN.';
-        return;
-      }
-
-      const operator = allOperators.find(op => op.id == selectedId);
-      
-      if (operator && operator.pin === enteredPin) {
-        currentOperator = operator;
-        $pinInput.value = '';
-        startApp();
-      } else {
-        $loginError.textContent = 'PIN incorreto. Tente novamente.';
-        $pinInput.value = '';
-        $pinInput.focus();
-      }
-    }
+    // ====== LÓGICA DE UI ================================================================
+    const getEffectiveValue = (itemId, key) => staged.get(itemId)?.[key]?.new ?? allItems.find(i => i.id === itemId)?.[key];
     
-    function handleLogout() {
-      currentOperator = null;
-      staged.clear(); selected.clear();
-      loadOperatorsAndShowLogin();
-    }
-    
-    function startApp() {
-        $loginOverlay.classList.add('hidden');
-        $body.classList.remove('app-locked');
-        $operatorInfo.style.display = 'flex';
-        $operatorNameSpan.innerHTML = `Logado como: <strong>${currentOperator.nome}</strong>`;
-        fetchItems();
-    }
-
-
-    // ====== LÓGICA DE UI ===================================================================
     function openStockModal(item) {
-      activeModalItem = item;
-      $modalItemName.textContent = item.nome;
-      const effectiveStock = staged.get(item.id)?.estoqueAtual ?? item.estoqueAtual;
-      const effectiveStatus = staged.get(item.id)?.status || item.status;
-
-      $stockInput.value = effectiveStock ?? 0;
-      if (effectiveStatus === 'COMPRAR') {
-        $modalListActionBtn.textContent = 'Remover da Lista';
-        $modalListActionBtn.classList.remove('primary');
-      } else {
-        $modalListActionBtn.textContent = 'Adicionar à Lista';
-        $modalListActionBtn.classList.add('primary');
-      }
-      $modalOverlay.classList.add('visible');
-      $body.classList.add('modal-open');
+        activeModalItem = item;
+        $modalItemName.textContent = item.nome;
+        const effectiveStock = getEffectiveValue(item.id, 'estoqueAtual');
+        const effectiveStatus = getEffectiveValue(item.id, 'status');
+        $stockInput.value = effectiveStock ?? 0;
+        if (effectiveStatus === 'COMPRAR') {
+            $modalListActionBtn.textContent = 'Remover da Lista';
+            $modalListActionBtn.classList.remove('primary');
+        } else {
+            $modalListActionBtn.textContent = 'Adicionar à Lista';
+            $modalListActionBtn.classList.add('primary');
+        }
+        $modalOverlay.classList.add('visible');
+        $body.classList.add('modal-open');
     }
     function closeStockModal() { $modalOverlay.classList.remove('visible'); $body.classList.remove('modal-open'); activeModalItem = null; }
     
     function setSelectionMode(isActive) {
-      $body.classList.toggle('selection-mode', isActive);
-      $shoppingModeBtn.style.display = isActive ? 'none' : 'flex';
-      $doneBtn.style.display = isActive ? 'flex' : 'none';
-      if (!isActive) { selected.clear(); }
-      updateUI();
-      render();
-    }
-
-    function updateUI() {
-      const selectionCount = selected.size;
-      const stagedCount = staged.size;
-      const isInSelectionMode = $body.classList.contains('selection-mode');
-      
-      $selectionInfo.textContent = selectionCount === 0 ? 'Selecionar Itens' : `${selectionCount} ${selectionCount === 1 ? 'item' : 'itens'} selecionado${selectionCount > 1 ? 's' : ''}`;
-      
-      const isFooterVisible = isInSelectionMode || stagedCount > 0;
-      $footerbar.classList.toggle('visible', isFooterVisible);
-      
-      $save.parentElement.style.display = isInSelectionMode ? 'none' : 'block';
-      if (isInSelectionMode) {
-        let canAdd = false, canRemove = false;
-        selected.forEach(id => {
-            const item = allItems.find(i => i.id === id);
-            if(item) {
-                const effectiveStatus = staged.get(id)?.status || item.status;
-                if (effectiveStatus === 'COMPRAR') canRemove = true;
-                else canAdd = true;
-            }
-        });
-        $addToListBtn.disabled = !canAdd;
-        $removeFromListBtn.disabled = !canRemove;
-      }
-      $save.disabled = stagedCount === 0;
-    }
-
-    // ====== RENDERIZAÇÃO =================================================================
-    const statusInfo = (s) => ({ 'OK': { text: 'OK', cls: 'ok' }, 'ALERTA': { text: 'Alerta', cls: 'warn' }, 'FALTA': { text: 'Falta', cls: 'bad' }, 'COMPRAR': { text: 'Comprar', cls: 'buy' } }[s] || { text: s, cls: '' });
-
-    function render() {
-      const q = ($search.value || '').toLowerCase();
-      const filtered = allItems.filter(item => {
-        const stagedItem = staged.get(item.id) || {};
-        const effectiveStatus = stagedItem.status || item.status;
-        const inView = (currentView === 'compras') ? effectiveStatus !== 'OK' : true;
-        const matchesSearch = !q || item.nome.toLowerCase().includes(q) || (item.categoria || '').toLowerCase().includes(q);
-        return inView && matchesSearch;
-      });
-
-      $list.innerHTML = '';
-      $empty.style.display = filtered.length === 0 ? 'block' : 'none';
-      if (filtered.length === 0) return;
-
-      const groupedItems = filtered.reduce((acc, item) => {
-        const category = item.categoria || 'Outros';
-        if (!acc[category]) { acc[category] = []; }
-        acc[category].push(item);
-        return acc;
-      }, {});
-      
-      const sortedCategories = Object.keys(groupedItems).sort((a, b) => a === 'Outros' ? 1 : b === 'Outros' ? -1 : a.localeCompare(b));
-      
-      for (const category of sortedCategories) {
-        const header = document.createElement('h3');
-        header.className = 'category-header';
-        header.dataset.category = category;
-        const categoryItems = groupedItems[category];
-        const allInCategorySelected = categoryItems.every(item => selected.has(item.id));
-        header.innerHTML = `<span>${category}</span><input type="checkbox" class="category-checkbox" ${allInCategorySelected ? 'checked' : ''}>`;
-        $list.appendChild(header);
-
-        const grid = document.createElement('div');
-        grid.className = 'grid';
-        for (const item of categoryItems) {
-          const card = document.createElement('div');
-          card.className = 'card';
-          card.dataset.itemId = item.id;
-          grid.appendChild(card);
-          renderCardContent(card, item);
-        }
-        $list.appendChild(grid);
-      }
+        $body.classList.toggle('selection-mode', isActive);
+        if (!isActive) { selected.clear(); }
+        updateUI();
+        render();
     }
     
-    function renderCardContent(cardElement, item) {
-        const stagedItem = staged.get(item.id) || {};
-        const effectiveStatus = stagedItem.status || item.status;
-        const effectiveStock = stagedItem.estoqueAtual !== undefined ? stagedItem.estoqueAtual : item.estoqueAtual;
-        const s = statusInfo(effectiveStatus);
-        cardElement.classList.toggle('selected', selected.has(item.id));
-        cardElement.innerHTML = `
-          <input type="checkbox" class="item-checkbox" ${selected.has(item.id) ? 'checked' : ''}>
-          <div class="item-details">
-            <div class="name">${item.nome}</div>
-            <div class="meta">
-                <span class="stock-info">${effectiveStock} / ${item.parMin || '?'} ${item.unidade || ''}</span>
-                <span> • Par Mín: ${item.parMin || '?'}</span>
-            </div>
-            <div class="pill ${s.cls}">${s.text}</div>
-          </div>
-        `;
+    function updateUI() {
+        const selectionCount = selected.size;
+        const stagedCount = staged.size;
+        const isInSelectionMode = $body.classList.contains('selection-mode');
+        
+        $selectionInfo.textContent = selectionCount === 0 ? 'Selecionar Itens' : `${selectionCount} ${selectionCount === 1 ? 'item' : 'itens'} selecionado${selectionCount > 1 ? 's' : ''}`;
+        $footerbar.classList.toggle('visible', isInSelectionMode || stagedCount > 0);
+        
+        if (isInSelectionMode) {
+            let canAdd = false, canRemove = false;
+            selected.forEach(id => {
+                const effectiveStatus = getEffectiveValue(id, 'status');
+                if (effectiveStatus === 'COMPRAR') canRemove = true;
+                else canAdd = true;
+            });
+            $addToListBtn.disabled = !canAdd;
+            $removeFromListBtn.disabled = !canRemove;
+        }
+        $save.disabled = stagedCount === 0;
+    }
+    
+    // ====== RENDERIZAÇÃO ==============================================================
+    const statusInfo = (s) => ({ 'OK': { text: 'OK', cls: 'ok' }, 'ALERTA': { text: 'Alerta', cls: 'warn' }, 'FALTA': { text: 'Falta', cls: 'bad' }, 'COMPRAR': { text: 'Comprar', cls: 'buy' } }[s] || { text: s, cls: '' });
+    
+    function render() {
+        const q = ($search.value || '').toLowerCase();
+        const filtered = allItems.filter(item => {
+            const effectiveStatus = getEffectiveValue(item.id, 'status');
+            const inView = (currentView === 'compras') ? effectiveStatus !== 'OK' : true;
+            const matchesSearch = !q || item.nome.toLowerCase().includes(q) || (item.categoria || '').toLowerCase().includes(q);
+            return inView && matchesSearch;
+        });
+        $list.innerHTML = '';
+        $empty.style.display = filtered.length === 0 ? 'block' : 'none';
+        if (filtered.length === 0) return;
+        
+        const groupedItems = filtered.reduce((acc, item) => { (acc[item.categoria || 'Outros'] = acc[item.categoria || 'Outros'] || []).push(item); return acc; }, {});
+        const sortedCategories = Object.keys(groupedItems).sort((a, b) => a === 'Outros' ? 1 : b === 'Outros' ? -1 : a.localeCompare(b));
+        
+        for (const category of sortedCategories) {
+            const header = document.createElement('h3');
+            header.className = 'category-header';
+            header.dataset.category = category;
+            const allInCategorySelected = groupedItems[category].every(item => selected.has(item.id));
+            header.innerHTML = `<span>${category}</span><input type="checkbox" class="category-checkbox" ${allInCategorySelected ? 'checked' : ''}>`;
+            $list.appendChild(header);
+            
+            const grid = document.createElement('div');
+            grid.className = 'grid';
+            groupedItems[category].forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.itemId = item.id;
+                renderCardContent(card, item);
+                grid.appendChild(card);
+            });
+            $list.appendChild(grid);
+        }
     }
 
-    // ====== AÇÕES E BANCO DE DADOS =======================================================
-    function calculateStatus(estoque, parMin) {
-        return (estoque <= 0) ? 'FALTA' : (estoque <= parMin) ? 'ALERTA' : 'OK';
+    function renderCardContent(cardElement, item) {
+        const effectiveStatus = getEffectiveValue(item.id, 'status');
+        const effectiveStock = getEffectiveValue(item.id, 'estoqueAtual');
+        const s = statusInfo(effectiveStatus);
+        cardElement.classList.toggle('selected', selected.has(item.id));
+        cardElement.innerHTML = ` <input type="checkbox" class="item-checkbox" ${selected.has(item.id) ? 'checked' : ''}> <div class="item-details"> <div class="name">${item.nome}</div> <div class="meta"> <span class="stock-info">${effectiveStock} / ${item.parMin || '?'} ${item.unidade || ''}</span> <span> • Par Mín: ${item.parMin || '?'}</span> </div> <div class="pill ${s.cls}">${s.text}</div> </div> `;
     }
+
+    // ====== AÇÕES E BANCO DE DADOS =====================================================
+    function calculateStatus(estoque, parMin) { return (estoque <= 0) ? 'FALTA' : (estoque <= parMin) ? 'ALERTA' : 'OK'; }
+
+    const stageChange = (itemId, key, newValue) => {
+        const oldValue = getEffectiveValue(itemId, key);
+        if (newValue === oldValue) return;
+        
+        const currentPatch = staged.get(itemId) || {};
+        staged.set(itemId, {
+            ...currentPatch,
+            [key]: { old: oldValue, new: newValue }
+        });
+    };
 
     function confirmStockUpdate() {
         if (!activeModalItem) return;
-        const quantidadeAtual = parseInt($stockInput.value, 10);
-        const novoStatus = calculateStatus(quantidadeAtual, activeModalItem.parMin);
-        staged.set(activeModalItem.id, { ...staged.get(activeModalItem.id), estoqueAtual: quantidadeAtual, status: novoStatus });
-        closeStockModal();
-        render();
-        updateUI();
+        const newStock = parseInt($stockInput.value, 10);
+        const newStatus = calculateStatus(newStock, activeModalItem.parMin);
+        stageChange(activeModalItem.id, 'estoqueAtual', newStock);
+        stageChange(activeModalItem.id, 'status', newStatus);
+        closeStockModal(); render(); updateUI();
     }
     
     function toggleListItemInModal() {
         if (!activeModalItem) return;
-        const { id, estoqueAtual, parMin } = activeModalItem;
-        const stagedItem = staged.get(id) || {};
-        const effectiveStatus = stagedItem.status || activeModalItem.status;
-        let novoStatus = (effectiveStatus === 'COMPRAR') ? calculateStatus(stagedItem.estoqueAtual ?? estoqueAtual, parMin) : 'COMPRAR';
-        staged.set(id, { ...stagedItem, status: novoStatus });
-        closeStockModal();
-        render();
-        updateUI();
+        const oldStatus = getEffectiveValue(activeModalItem.id, 'status');
+        const newStatus = (oldStatus === 'COMPRAR') 
+            ? calculateStatus(getEffectiveValue(activeModalItem.id, 'estoqueAtual'), activeModalItem.parMin)
+            : 'COMPRAR';
+        stageChange(activeModalItem.id, 'status', newStatus);
+        closeStockModal(); render(); updateUI();
     }
 
     function bulkUpdateList(action) {
         if (selected.size === 0) return;
         selected.forEach(id => {
-            const item = allItems.find(i => i.id === id);
-            if (!item) return;
-            const stagedItem = staged.get(id) || {};
-            const effectiveStatus = stagedItem.status || item.status;
-
-            if (action === 'add' && effectiveStatus !== 'COMPRAR') {
-                staged.set(id, { ...stagedItem, status: 'COMPRAR' });
-            } else if (action === 'remove' && effectiveStatus === 'COMPRAR') {
-                const effectiveStock = stagedItem.estoqueAtual ?? item.estoqueAtual;
-                const newStatus = calculateStatus(effectiveStock, item.parMin);
-                staged.set(id, { ...stagedItem, status: newStatus });
+            const oldStatus = getEffectiveValue(id, 'status');
+            let newStatus = oldStatus;
+            if (action === 'add' && oldStatus !== 'COMPRAR') {
+                newStatus = 'COMPRAR';
+            } else if (action === 'remove' && oldStatus === 'COMPRAR') {
+                const item = allItems.find(i => i.id === id);
+                newStatus = calculateStatus(getEffectiveValue(id, 'estoqueAtual'), item.parMin);
             }
+            stageChange(id, 'status', newStatus);
         });
-        selected.clear();
-        render();
-        updateUI();
-        setSelectionMode(false);
+        selected.clear(); setSelectionMode(false);
     }
     
-    async function saveStaged() {
-      if (staged.size === 0 || !currentOperator) return;
-      $save.classList.add('saving'); $save.disabled = true;
+    async function saveStaged() { if (staged.size === 0 || !currentOperator) return; $save.classList.add('saving'); $save.disabled = true; try { const alterationsPayload = Object.fromEntries(staged); const { error } = await supabase.rpc('salvar_alteracoes_e_logar', { p_operador_id: currentOperator.id, p_alteracoes: alterationsPayload }); if (error) { throw error; } staged.clear(); await fetchItems(); } catch (e) { console.error('Erro ao salvar:', e); alert('Ocorreu um erro ao salvar as alterações. Verifique sua conexão e tente novamente.'); } finally { $save.classList.remove('saving'); updateUI(); } }
+    async function fetchItems() { const { data, error } = await supabase.from('itens').select('*').order('nome'); if (error) { console.error(error); return; } allItems = data || []; render(); updateUI(); }
 
-      try {
-        const alterationsPayload = Object.fromEntries(staged);
-        const { error } = await supabase.rpc('salvar_alteracoes_e_logar', {
-          p_operador_id: currentOperator.id,
-          p_alteracoes: alterationsPayload
-        });
-        if (error) { throw error; }
-        
-        staged.clear();
-        await fetchItems();
-
-      } catch (e) {
-        console.error('Erro ao salvar:', e);
-        alert('Ocorreu um erro ao salvar as alterações. Verifique sua conexão e tente novamente.');
-      } finally {
-        $save.classList.remove('saving');
-        updateUI();
-      }
-    }
-
-    async function fetchItems() {
-      const { data, error } = await supabase.from('itens').select('*').order('nome');
-      if (error) { console.error(error); return; }
-      allItems = data || [];
-      render();
-      updateUI();
-    }
-
-    // ====== EVENT LISTENERS ===============================================================
-    $list.addEventListener('click', (e) => {
-        const card = e.target.closest('.card');
-        const categoryHeader = e.target.closest('.category-header');
-        if ($body.classList.contains('selection-mode') && categoryHeader && e.target.type === 'checkbox') {
-            const category = categoryHeader.dataset.category;
-            const itemsInCategory = allItems.filter(item => (item.categoria || 'Outros') === category);
-            const allSelected = itemsInCategory.every(item => selected.has(item.id));
-            itemsInCategory.forEach(item => allSelected ? selected.delete(item.id) : selected.add(item.id));
-            render();
-            updateUI();
-            return;
-        }
-        if (card) {
-            const itemId = parseInt(card.dataset.itemId, 10);
-            const item = allItems.find(i => i.id === itemId);
-            if(!item) return;
-            if ($body.classList.contains('selection-mode')) {
-                selected.has(itemId) ? selected.delete(itemId) : selected.add(itemId);
-                card.classList.toggle('selected', selected.has(item.id));
-                const checkbox = card.querySelector('.item-checkbox');
-                if (checkbox) checkbox.checked = selected.has(item.id);
-                updateUI();
-            } else {
-                openStockModal(item);
-            }
-        }
-    });
-    $shoppingModeBtn.addEventListener('click', () => setSelectionMode(true));
-    $doneBtn.addEventListener('click', () => setSelectionMode(false));
-    $tabs.forEach(tab => tab.addEventListener('click', (e) => { currentView = e.target.dataset.view; $tabs.forEach(t => t.classList.remove('active')); e.target.classList.add('active'); render(); }));
-    $search.addEventListener('input', render);
-    $addToListBtn.addEventListener('click', () => bulkUpdateList('add'));
-    $removeFromListBtn.addEventListener('click', () => bulkUpdateList('remove'));
-    $save.addEventListener('click', saveStaged);
-    $decrementBtn.addEventListener('click', () => { $stockInput.value = Math.max(0, parseInt($stockInput.value, 10) - 1); });
-    $incrementBtn.addEventListener('click', () => { $stockInput.value = parseInt($stockInput.value, 10) + 1; });
-    $cancelBtn.addEventListener('click', closeStockModal);
-    $confirmBtn.addEventListener('click', confirmStockUpdate);
-    $modalListActionBtn.addEventListener('click', toggleListItemInModal);
-    $modalOverlay.addEventListener('click', (e) => { if (e.target === $modalOverlay) closeStockModal(); });
-    
-    $loginBtn.addEventListener('click', handleLogin);
-    $pinInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleLogin(); });
-    $logoutBtn.addEventListener('click', handleLogout);
+    // ====== EVENT LISTENERS ==============================================================
+    $list.addEventListener('click', (e) => { const card = e.target.closest('.card'); const categoryHeader = e.target.closest('.category-header'); if ($body.classList.contains('selection-mode') && categoryHeader && e.target.type === 'checkbox') { const category = categoryHeader.dataset.category; groupedItems[category].forEach(item => selected.has(item.id) ? selected.delete(item.id) : selected.add(item.id)); render(); updateUI(); return; } if (card) { const itemId = parseInt(card.dataset.itemId, 10); if ($body.classList.contains('selection-mode')) { selected.has(itemId) ? selected.delete(itemId) : selected.add(itemId); render(); updateUI(); } else { openStockModal(allItems.find(i => i.id === itemId)); } } });
+    $shoppingModeBtn.addEventListener('click', () => setSelectionMode(true)); $doneBtn.addEventListener('click', () => setSelectionMode(false)); $tabs.forEach(tab => tab.addEventListener('click', (e) => { currentView = e.target.dataset.view; $tabs.forEach(t => t.classList.remove('active')); e.target.classList.add('active'); render(); })); $search.addEventListener('input', render); $addToListBtn.addEventListener('click', () => bulkUpdateList('add')); $removeFromListBtn.addEventListener('click', () => bulkUpdateList('remove')); $save.addEventListener('click', saveStaged); $decrementBtn.addEventListener('click', () => { $stockInput.value = Math.max(0, parseInt($stockInput.value, 10) - 1); }); $incrementBtn.addEventListener('click', () => { $stockInput.value = parseInt($stockInput.value, 10) + 1; }); $cancelBtn.addEventListener('click', closeStockModal); $confirmBtn.addEventListener('click', confirmStockUpdate); $modalListActionBtn.addEventListener('click', toggleListItemInModal); $modalOverlay.addEventListener('click', (e) => { if (e.target === $modalOverlay) closeStockModal(); });
+    $loginBtn.addEventListener('click', handleLogin); $pinInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleLogin(); }); $logoutBtn.addEventListener('click', handleLogout);
     
     // ====== INICIALIZAÇÃO =================================================================
     initAuth();
