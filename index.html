@@ -20,6 +20,7 @@
       min-height: 100%;
     }
     body.modal-open { overflow: hidden; }
+    body.app-locked header, body.app-locked .container, body.app-locked .footerbar { display: none; }
 
     /* ===== Header ===== */
     header{ position:sticky; top:0; z-index:10; background:rgba(255,255,255,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom:1px solid var(--border); padding:10px 12px; }
@@ -34,9 +35,12 @@
     .icon-btn:hover { color: var(--text); background: #f1f5f9; border-radius: 50%;}
     .icon-btn svg { width: 24px; height: 24px; }
     #selection-header-content { display: none; }
-    body.selection-mode .header-main-content, body.selection-mode #shopping-mode-btn { display: none; }
+    body.selection-mode .header-main-content, body.selection-mode #shopping-mode-btn, body.selection-mode #operator-info { display: none; }
     body.selection-mode #selection-header-content { display: flex; flex-grow: 1; align-items: center; justify-content: space-between; }
     #selection-info { font-weight: 600; color: var(--primary-color); }
+    .operator-info-container { display: flex; align-items: center; gap: 8px; flex-shrink: 0; background: #f1f5f9; padding: 6px 6px 6px 12px; border-radius: 99px; }
+    .operator-name { font-size: 0.9rem; font-weight: 600; color: var(--muted); }
+    .operator-name strong { color: var(--text); }
 
     /* ===== Conteúdo e Cards ===== */
     .container{ padding:12px 12px 120px; max-width:1200px; margin:0 auto; }
@@ -63,13 +67,11 @@
     .footerbar{ position:fixed; left:0; right:0; bottom:0; z-index: 20; background:rgba(255,255,255,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-top:1px solid var(--border); padding:10px 12px calc(10px + env(safe-area-inset-bottom)); box-shadow:0 -6px 20px rgba(2,6,23,.06); transition: transform 0.3s ease-in-out; transform: translateY(100%); }
     .footerbar.visible { transform: translateY(0); }
     .footer-content { display: grid; gap: 8px; }
-    .bulk-actions { display: none; grid-template-columns: 1fr 1fr; gap: 8px; } /* Botões de ação em massa */
+    .bulk-actions { display: none; grid-template-columns: 1fr 1fr; gap: 8px; }
     body.selection-mode .bulk-actions { display: grid; }
     #save-btn-wrapper { display: block; }
     body.selection-mode #save-btn-wrapper { display: none; }
-    #save-btn-wrapper button {
-      width: 100%;
-    }
+    #save-btn-wrapper button { width: 100%; }
 
     /* ===== Modal de Edição de Estoque ===== */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 99; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; transition: opacity .2s; pointer-events: none; }
@@ -85,6 +87,16 @@
     .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     #modal-list-action-btn { grid-column: 1 / -1; margin-top: 10px; }
 
+    /* ===== Tela de Login ===== */
+    .login-overlay { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 1rem; transition: opacity 0.3s ease-in-out; }
+    .login-overlay.hidden { opacity: 0; pointer-events: none; }
+    .login-box { width: 100%; max-width: 360px; padding: 24px; }
+    .login-title { text-align: center; font-size: 1.5rem; margin-bottom: 24px; }
+    .login-form { display: flex; flex-direction: column; gap: 16px; }
+    .login-form label { font-weight: 500; color: var(--muted); font-size: 0.9rem; margin-bottom: -8px; }
+    .login-input { width: 100%; padding: 12px; font-size: 1rem; border: 1px solid var(--border); border-radius: 10px; background: var(--card); }
+    .login-error-msg { color: var(--bad); text-align: center; min-height: 1.2em; font-size: 0.9rem; margin: 0; }
+
     /* ===== Outros Estilos ===== */
     button { cursor:pointer;border-radius:10px;border:1px solid var(--border); background:#f8fafc;color:var(--text);padding:12px 10px;font-size:1rem; position: relative; transition: background .2s, color .2s; }
     button.primary{ background:var(--primary-color);color:#fff; border-color:var(--primary-color); font-weight:600; }
@@ -95,13 +107,19 @@
     .empty{ color:#64748b; font-style:italic; padding:24px 0; text-align:center; }
   </style>
 </head>
-<body class="">
+<body class="app-locked">
   
   <header>
     <div class="header-wrap">
       <div class="header-main-content">
         <div class="tabs"> <button class="tab active" data-view="producao">Produção</button> <button class="tab" data-view="compras">Compras</button> </div>
         <div class="toolbar"> <input id="search" type="search" placeholder="Buscar item…"/> </div>
+      </div>
+      <div id="operator-info" class="operator-info-container" style="display: none;">
+        <span class="operator-name"></span>
+        <button id="logout-btn" class="icon-btn" title="Trocar Operador">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-3.5-8.5 4-4-4-4-1.414 1.414L8.586 11H4v2h4.586l-1.5 1.5 1.414 1.414zm7-4-4 4 4 4 1.414-1.414L15.414 13H20v-2h-4.586l1.5-1.5-1.414-1.414z"/></svg>
+        </button>
       </div>
       <div id="selection-header-content"> <span id="selection-info"></span></div>
       <div class="header-actions">
@@ -141,6 +159,21 @@
     </div>
   </div>
 
+  <div class="login-overlay" id="login-overlay">
+    <div class="login-box">
+      <h2 class="login-title">Identifique-se</h2>
+      <div class="login-form">
+        <label for="operator-select">Operador</label>
+        <select id="operator-select" class="login-input">
+          <option value="">Carregando operadores...</option>
+        </select>
+        <label for="pin-input">PIN</label>
+        <input type="password" id="pin-input" class="login-input" pattern="[0-9]*" inputmode="numeric" placeholder="Digite seu PIN">
+        <button id="login-btn" class="primary">Entrar</button>
+        <p id="login-error" class="login-error-msg"></p>
+      </div>
+    </div>
+  </div>
 
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -149,6 +182,11 @@
     const SUPABASE_URL = 'https://slrjqqzzxxpywquphvjz.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNscmpxcXp6eHhweXdxdXBodmp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2OTYyMjksImV4cCI6MjA3MDI3MjIyOX0.JuzZMOC2X4NQUXeVdYBoQDY5pN-2O2igPK0zjNdcjcU';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // --> NOVO: Estado de autenticação e operadores
+    let allOperators = [];
+    let currentOperator = null;
+
     let allItems = [], staged = new Map(), selected = new Set(), currentView = 'producao';
     let activeModalItem = null;
 
@@ -156,25 +194,86 @@
     const $body = document.body;
     const $list = document.getElementById('list');
     const $search = document.getElementById('search');
-    const $tabs = document.querySelectorAll('.tab');
-    const $shoppingModeBtn = document.getElementById('shopping-mode-btn');
-    const $doneBtn = document.getElementById('done-btn');
-    const $selectionInfo = document.getElementById('selection-info');
-    const $footerbar = document.getElementById('footerbar');
-    const $addToListBtn = document.getElementById('add-to-list-btn');
-    const $removeFromListBtn = document.getElementById('remove-from-list-btn');
+    // ... (demais elementos do app principal)
     const $save = document.getElementById('save');
-    const $empty = document.getElementById('empty');
-    const $modalOverlay = document.getElementById('stock-modal-overlay');
-    const $modalItemName = document.getElementById('modal-item-name');
-    const $stockInput = document.getElementById('stock-input');
-    const $decrementBtn = document.getElementById('decrement-stock');
-    const $incrementBtn = document.getElementById('increment-stock');
-    const $cancelBtn = document.getElementById('cancel-stock-update');
-    const $confirmBtn = document.getElementById('confirm-stock-update');
-    const $modalListActionBtn = document.getElementById('modal-list-action-btn');
 
-    // ====== LÓGICA DE UI ===================================================================
+    // --> NOVO: Elementos do DOM para Login e autenticação
+    const $loginOverlay = document.getElementById('login-overlay');
+    const $operatorSelect = document.getElementById('operator-select');
+    const $pinInput = document.getElementById('pin-input');
+    const $loginBtn = document.getElementById('login-btn');
+    const $loginError = document.getElementById('login-error');
+    const $operatorInfo = document.getElementById('operator-info');
+    const $operatorNameSpan = $operatorInfo.querySelector('.operator-name');
+    const $logoutBtn = document.getElementById('logout-btn');
+
+
+    // --> NOVO: LÓGICA DE AUTENTICAÇÃO =====================================================
+    async function initAuth() {
+      $body.classList.add('app-locked');
+      const { data, error } = await supabase.from('operadores').select('id, nome, pin');
+      if (error) {
+        alert('Erro ao carregar operadores. Verifique a conexão e tente recarregar.');
+        return;
+      }
+      allOperators = data || [];
+      loadOperatorsAndShowLogin();
+    }
+
+    function loadOperatorsAndShowLogin() {
+      $operatorSelect.innerHTML = '<option value="" disabled selected>Selecione seu nome</option>';
+      allOperators.forEach(op => {
+        const option = document.createElement('option');
+        option.value = op.id;
+        option.textContent = op.nome;
+        $operatorSelect.appendChild(option);
+      });
+      $body.classList.add('app-locked');
+      $loginOverlay.classList.remove('hidden');
+    }
+
+    function handleLogin() {
+      const selectedId = $operatorSelect.value;
+      const enteredPin = $pinInput.value;
+      $loginError.textContent = '';
+
+      if (!selectedId || !enteredPin) {
+        $loginError.textContent = 'Por favor, selecione seu nome e digite o PIN.';
+        return;
+      }
+
+      const operator = allOperators.find(op => op.id == selectedId);
+      
+      if (operator && operator.pin === enteredPin) {
+        // Sucesso no login
+        currentOperator = operator;
+        $pinInput.value = '';
+        startApp();
+      } else {
+        // Falha no login
+        $loginError.textContent = 'PIN incorreto. Tente novamente.';
+        $pinInput.value = '';
+        $pinInput.focus();
+      }
+    }
+    
+    function handleLogout() {
+      currentOperator = null;
+      staged.clear(); selected.clear();
+      loadOperatorsAndShowLogin();
+    }
+    
+    function startApp() {
+        $loginOverlay.classList.add('hidden');
+        $body.classList.remove('app-locked');
+        $operatorInfo.style.display = 'flex';
+        $operatorNameSpan.innerHTML = `Logado como: <strong>${currentOperator.nome}</strong>`;
+        fetchItems();
+    }
+
+
+    // ====== LÓGICA DE UI (sem alterações significativas) =================================
+    // ... as funções openStockModal, closeStockModal, setSelectionMode, updateUI permanecem as mesmas
     function openStockModal(item) {
       activeModalItem = item;
       $modalItemName.textContent = item.nome;
@@ -196,8 +295,8 @@
     
     function setSelectionMode(isActive) {
       $body.classList.toggle('selection-mode', isActive);
-      $shoppingModeBtn.style.display = isActive ? 'none' : 'flex';
-      $doneBtn.style.display = isActive ? 'flex' : 'none';
+      document.getElementById('shopping-mode-btn').style.display = isActive ? 'none' : 'flex';
+      document.getElementById('done-btn').style.display = isActive ? 'flex' : 'none';
       if (!isActive) { selected.clear(); }
       updateUI();
       render();
@@ -208,10 +307,10 @@
       const stagedCount = staged.size;
       const isInSelectionMode = $body.classList.contains('selection-mode');
       
-      $selectionInfo.textContent = selectionCount === 0 ? 'Selecionar Itens' : `${selectionCount} ${selectionCount === 1 ? 'item' : 'itens'} selecionado${selectionCount > 1 ? 's' : ''}`;
+      document.getElementById('selection-info').textContent = selectionCount === 0 ? 'Selecionar Itens' : `${selectionCount} ${selectionCount === 1 ? 'item' : 'itens'} selecionado${selectionCount > 1 ? 's' : ''}`;
       
       const isFooterVisible = isInSelectionMode || stagedCount > 0;
-      $footerbar.classList.toggle('visible', isFooterVisible);
+      document.getElementById('footerbar').classList.toggle('visible', isFooterVisible);
       
       $save.style.display = isInSelectionMode ? 'none' : 'block';
       if (isInSelectionMode) {
@@ -224,13 +323,14 @@
                 else canAdd = true;
             }
         });
-        $addToListBtn.disabled = !canAdd;
-        $removeFromListBtn.disabled = !canRemove;
+        document.getElementById('add-to-list-btn').disabled = !canAdd;
+        document.getElementById('remove-from-list-btn').disabled = !canRemove;
       }
       $save.disabled = stagedCount === 0;
     }
-    
-    // ====== RENDERIZAÇÃO =================================================================
+
+    // ====== RENDERIZAÇÃO (sem alterações significativas) ================================
+    // ... as funções render e renderCardContent permanecem as mesmas
     const statusInfo = (s) => ({ 'OK': { text: 'OK', cls: 'ok' }, 'ALERTA': { text: 'Alerta', cls: 'warn' }, 'FALTA': { text: 'Falta', cls: 'bad' }, 'COMPRAR': { text: 'Comprar', cls: 'buy' } }[s] || { text: s, cls: '' });
 
     function render() {
@@ -244,7 +344,7 @@
       });
 
       $list.innerHTML = '';
-      $empty.style.display = filtered.length === 0 ? 'block' : 'none';
+      document.getElementById('empty').style.display = filtered.length === 0 ? 'block' : 'none';
       if (filtered.length === 0) return;
 
       const groupedItems = filtered.reduce((acc, item) => {
@@ -277,7 +377,7 @@
         $list.appendChild(grid);
       }
     }
-
+    
     function renderCardContent(cardElement, item) {
         const stagedItem = staged.get(item.id) || {};
         const effectiveStatus = stagedItem.status || item.status;
@@ -296,8 +396,9 @@
           </div>
         `;
     }
-    
-    // ====== AÇÕES E BANCO DE DADOS ========================================================
+
+    // ====== AÇÕES E BANCO DE DADOS =======================================================
+    // ... as funções calculateStatus, confirmStockUpdate, etc. permanecem as mesmas
     function calculateStatus(estoque, parMin) {
         return (estoque <= 0) ? 'FALTA' : (estoque <= parMin) ? 'ALERTA' : 'OK';
     }
@@ -346,18 +447,35 @@
         setSelectionMode(false);
     }
     
+    // --> NOVO: Função saveStaged() reescrita para usar a RPC
     async function saveStaged() {
-      if (staged.size === 0) return;
+      if (staged.size === 0 || !currentOperator) return;
       $save.classList.add('saving'); $save.disabled = true;
+
       try {
-        const ops = Array.from(staged.entries()).map(([id, patch]) => supabase.from('itens').update(patch).eq('id', id));
-        await Promise.all(ops);
+        // Converte o Map para um Objeto que pode ser serializado em JSON
+        const alterationsPayload = Object.fromEntries(staged);
+        
+        // Chama a função RPC no Supabase
+        const { error } = await supabase.rpc('salvar_alteracoes_e_logar', {
+          p_operador_id: currentOperator.id,
+          p_alteracoes: alterationsPayload
+        });
+
+        if (error) {
+          throw error; // Lança o erro para ser pego pelo bloco catch
+        }
+        
+        // Se a chamada RPC foi bem-sucedida, limpa o estado e busca os dados atualizados
         staged.clear();
         await fetchItems();
+
       } catch (e) {
-        console.error('Erro ao salvar:', e); alert('Ocorreu um erro ao salvar as alterações.');
+        console.error('Erro ao salvar:', e);
+        alert('Ocorreu um erro ao salvar as alterações. Verifique sua conexão e tente novamente.');
       } finally {
-        $save.classList.remove('saving'); updateUI();
+        $save.classList.remove('saving');
+        updateUI();
       }
     }
 
@@ -370,10 +488,10 @@
     }
 
     // ====== EVENT LISTENERS ===============================================================
+    // ... Event Listeners do app principal permanecem os mesmos
     $list.addEventListener('click', (e) => {
         const card = e.target.closest('.card');
         const categoryHeader = e.target.closest('.category-header');
-
         if ($body.classList.contains('selection-mode') && categoryHeader && e.target.type === 'checkbox') {
             const category = categoryHeader.dataset.category;
             const itemsInCategory = allItems.filter(item => (item.categoria || 'Outros') === category);
@@ -383,7 +501,6 @@
             updateUI();
             return;
         }
-
         if (card) {
             const itemId = parseInt(card.dataset.itemId, 10);
             const item = allItems.find(i => i.id === itemId);
@@ -399,25 +516,27 @@
             }
         }
     });
-
-    $shoppingModeBtn.addEventListener('click', () => setSelectionMode(true));
-    $doneBtn.addEventListener('click', () => setSelectionMode(false));
-    $tabs.forEach(tab => tab.addEventListener('click', (e) => { currentView = e.target.dataset.view; $tabs.forEach(t => t.classList.remove('active')); e.target.classList.add('active'); render(); }));
+    document.getElementById('shopping-mode-btn').addEventListener('click', () => setSelectionMode(true));
+    document.getElementById('done-btn').addEventListener('click', () => setSelectionMode(false));
+    document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', (e) => { currentView = e.target.dataset.view; document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); e.target.classList.add('active'); render(); }));
     $search.addEventListener('input', render);
-    $addToListBtn.addEventListener('click', () => bulkUpdateList('add'));
-    $removeFromListBtn.addEventListener('click', () => bulkUpdateList('remove'));
+    document.getElementById('add-to-list-btn').addEventListener('click', () => bulkUpdateList('add'));
+    document.getElementById('remove-from-list-btn').addEventListener('click', () => bulkUpdateList('remove'));
     $save.addEventListener('click', saveStaged);
-    $decrementBtn.addEventListener('click', () => { $stockInput.value = Math.max(0, parseInt($stockInput.value, 10) - 1); });
-    $incrementBtn.addEventListener('click', () => { $stockInput.value = parseInt($stockInput.value, 10) + 1; });
-    $cancelBtn.addEventListener('click', closeStockModal);
-    $confirmBtn.addEventListener('click', confirmStockUpdate);
-    $modalListActionBtn.addEventListener('click', toggleListItemInModal);
-    $modalOverlay.addEventListener('click', (e) => { if (e.target === $modalOverlay) closeStockModal(); });
+    document.getElementById('decrement-stock').addEventListener('click', () => { $stockInput.value = Math.max(0, parseInt($stockInput.value, 10) - 1); });
+    document.getElementById('increment-stock').addEventListener('click', () => { $stockInput.value = parseInt($stockInput.value, 10) + 1; });
+    document.getElementById('cancel-stock-update').addEventListener('click', closeStockModal);
+    document.getElementById('confirm-stock-update').addEventListener('click', confirmStockUpdate);
+    document.getElementById('modal-list-action-btn').addEventListener('click', toggleListItemInModal);
+    document.getElementById('stock-modal-overlay').addEventListener('click', (e) => { if (e.target === document.getElementById('stock-modal-overlay')) closeStockModal(); });
+
+    // --> NOVO: Event Listeners para autenticação
+    $loginBtn.addEventListener('click', handleLogin);
+    $pinInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleLogin(); });
+    $logoutBtn.addEventListener('click', handleLogout);
     
     // ====== INICIALIZAÇÃO =================================================================
-    updateUI();
-    fetchItems();
+    initAuth();
   </script>
 </body>
 </html>
-
